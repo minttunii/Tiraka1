@@ -21,8 +21,9 @@ void printHalf(const list<int>& lst)
   */
     int middle = lst.size()/2;
     for(auto iter = lst.begin(); iter != lst.end(); iter++){
-        if(distance(lst.begin(), iter) <= middle ){
-             cout<< *iter << " " << endl;
+        if(distance(lst.begin(), iter) < middle ){
+             cout<< *iter << " ";
         }
     }
+    cout << endl;
 }

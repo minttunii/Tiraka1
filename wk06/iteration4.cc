@@ -21,6 +21,7 @@ void printReverse(const list<int>& lst)
   */
 
     for(auto iter = lst.rbegin(); iter != lst.rend(); iter++){
-        cout<< *iter << " " << endl;
+        cout<< *iter << " ";
     }
+    cout<<endl;
 }
