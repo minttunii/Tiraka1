@@ -20,5 +20,7 @@ void printReverse(const list<int>& lst)
   * Use iterators to go through the list and print elements
   */
 
-  // ADD YOUR CODE HERE
+    for(auto iter = lst.rbegin(); iter != lst.rend(); iter++){
+        cout<< *iter << " " << endl;
+    }
 }
