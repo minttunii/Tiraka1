@@ -13,6 +13,9 @@ using namespace std;
  */
 int sortAsc(std::vector<int>& v)
 {
-  return EXIT_FAILURE;
+  // Sort vector into ascending orger with sort algorithm
+  sort(v.begin(), v.end());
+  return EXIT_SUCCESS;
+
 }
 
