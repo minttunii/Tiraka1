@@ -12,7 +12,13 @@ using namespace std;
  * @param v the vector to be scanned through
  * @return std::vector<int>::reverse_iterator
  */
+
+bool IsEven(int i){
+    return ((i%2)==0);
+}
 std::vector<int>::reverse_iterator findLastEven(std::vector<int>& v)
 {
+    find_if(v.rbegin(), v.rend(), IsEven);
+
 }
 
