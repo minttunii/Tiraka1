@@ -15,18 +15,27 @@ using namespace std;
  */
 
 bool myfunction(int i, int j){
-    if(i%3 == 0 && j%3 != 0){
+    if(i%3 == 0 && j%3 ==1){
         return true;
     }
-    else if(j%3 == 0 && i%3 != 0){
-        return false;
-    }
-    else if(i%3 == 1 && j %3 == 2){
+    else if(i%3 == 0 && j%3 == 2){
         return true;
     }
-    else if(j%3 == 1 && i%3 != 2){
+    else if(i%3 == 1 && j%3 == 2){
+        return true;
+    }
+
+
+    else if(j%3 == 0 && i%3 == 1){
         return false;
     }
+    else if(j%3 == 0 && i%3 == 2){
+        return false;
+    }
+    else if(j%3 == 1 && i%3 == 2){
+        return false;
+    }
+
     else{
         return i < j;
     }
