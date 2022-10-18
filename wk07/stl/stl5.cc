@@ -13,8 +13,28 @@ using namespace std;
  * @param v a sortable vector
  * @return int EXIT_SUCCESS if everything went OK, EXIT_FAILURE otherwise
  */
+
+bool myfunction(int i, int j){
+    if(i%3 == 0 && j%3 != 0){
+        return true;
+    }
+    else if(j%3 == 0 && i%3 != 0){
+        return false;
+    }
+    else if(i%3 == 1 && j %3 == 2){
+        return true;
+    }
+    else if(j%3 == 1 && i%3 != 2){
+        return false;
+    }
+    else{
+        return i < j;
+    }
+}
+
 int sortMod3(std::vector<int>& v)
 {
-  return EXIT_FAILURE;
+    partial_sort(v.begin(), v.end(), v.end(), myfunction);
+    return EXIT_SUCCESS;
 }
 
