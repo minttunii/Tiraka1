@@ -9,6 +9,9 @@ test_*
 .qmake.stash
 .vscode
 */stl/stl
-*.pro.user
+*.pro.user*
+build-*/
+.~lock.*
 prg1/prg1
-
+prg1/docs
+a.out

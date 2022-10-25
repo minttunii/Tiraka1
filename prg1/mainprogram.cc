@@ -192,7 +192,7 @@ MainProgram::CmdResult MainProgram::cmd_add_departure(std::ostream& output, Matc
     {
         output << "Train " << trainid << " leaves from station ";
         print_station_brief(stationid, output, false);
-        output << " at " << time << endl;
+        output << " at " << setw(4) << setfill('0') << time << endl;
 //        return {ResultType::IDLIST, CmdResultIDs{{}, {stationid}}};
         return {};
     }
@@ -227,7 +227,7 @@ MainProgram::CmdResult MainProgram::cmd_remove_departure(std::ostream &output, M
     {
         output << "Removed departure of train " << trainid << " from station ";
         print_station_brief(stationid, output, false);
-        output << " at " << time << endl;
+        output << " at " << setw(4) << setfill('0') << time << endl;
 //        return {ResultType::IDLIST, CmdResultIDs{{}, {stationid}}};
         return {};
     }
@@ -268,10 +268,10 @@ MainProgram::CmdResult MainProgram::cmd_station_departures_after(std::ostream &o
     {
         output << "Departures from station ";
         print_station_brief(stationid, output, false);
-        output << " after " << time << ":" << endl;
+        output << " after " << setw(4) << setfill('0') << time << ":" << endl;
         for (auto& [deptime, trainid] : departures)
         {
-            output << " " << trainid << " at " << deptime << endl;
+            output << " " << trainid << " at " << setw(4) << setfill('0') << deptime << endl;
         }
     }
     else
@@ -396,14 +396,14 @@ MainProgram::CmdResult MainProgram::cmd_common_parent_of_regions(std::ostream &o
     return {ResultType::IDLIST, CmdResultIDs{{regionid1, regionid2, regionid}, {}}};
 }
 
-MainProgram::CmdResult MainProgram::cmd_station_in_regions(std::ostream& /*output*/, MainProgram::MatchIter begin, MainProgram::MatchIter end)
+MainProgram::CmdResult MainProgram::cmd_station_in_regions(std::ostream& output, MainProgram::MatchIter begin, MainProgram::MatchIter end)
 {
     StationID id = *begin++;
     assert( begin == end && "Impossible number of parameters!");
 
     auto result = ds_.station_in_regions(id);
-    if (result.empty()) { return {ResultType::IDLIST, CmdResultIDs{{NO_REGION}, {}}}; }
-    else { return {ResultType::IDLIST, CmdResultIDs{result, {id}}}; }
+    if (result.empty()) { output << "Station does not belong to any region." << std::endl; }
+    return {ResultType::IDLIST, CmdResultIDs{result, {id}}};
 }
 
 void MainProgram::test_station_in_regions()
