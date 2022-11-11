@@ -30,7 +30,7 @@ Type random_in_range(Type start, Type end)
 
 Datastructures::Datastructures()
 {
-    // Write any initialization you need here
+
 }
 
 Datastructures::~Datastructures()
@@ -38,43 +38,73 @@ Datastructures::~Datastructures()
     // Write any cleanup you need here
 }
 
+// Estimate of performance: O(1)
 unsigned int Datastructures::station_count()
 {
+    return stations.size();
+
     // Replace the line below with your implementation
-    throw NotImplemented("station_count()");
+    //throw NotImplemented("station_count()");
+
 }
 
+//Estimate of performance: O(n)
+// Clear function is linear on size
 void Datastructures::clear_all()
 {
-    // Replace the line below with your implementation
-    throw NotImplemented("clear_all()");
+    stations.clear(); regions.clear();
 }
 
+// Estimate of performance: O(n)
+//Iterating map is linear in worst case and
+// inserting to vector end is constant
 std::vector<StationID> Datastructures::all_stations()
 {
-    // Replace the line below with your implementation
-    throw NotImplemented("all_stations()");
+    std::vector<StationID> all_stations;
+    for(auto const& element : stations){
+        all_stations.push_back(element.first);
+    }
+    return all_stations;
 }
 
-bool Datastructures::add_station(StationID /*id*/, const Name& /*name*/, Coord /*xy*/)
+// Estimate of performance: O(n) (worst case)
+// Count function is constant on average and linear in worst case
+// Inserting to map is constant on average and linear on worst case.
+bool Datastructures::add_station(StationID id, const Name& name, Coord xy)
 {
-    // Replace the line below with your implementation
-    // Also uncomment parameters ( /* param */ -> param )
-    throw NotImplemented("add_station()");
+    // If station already exists, return false
+    if(stations.count(id) == 1){
+        return false;
+    }
+    station.name = name; station.coord = xy;
+    stations.insert({id, station});
+    return true;
 }
 
-Name Datastructures::get_station_name(StationID /*id*/)
+// Estimate of performance: O(n)
+// Find function is constant on average and
+// worst case linear in container size
+Name Datastructures::get_station_name(StationID id)
 {
-    // Replace the line below with your implementation
-    // Also uncomment parameters ( /* param */ -> param )
-    throw NotImplemented("get_station_name()");
+    auto it = stations.find(id);
+    // If station is not found
+    if(it == stations.end()){
+        return NO_NAME;
+    }
+    return it->second.name;
 }
 
-Coord Datastructures::get_station_coordinates(StationID /*id*/)
+// Estimate of performance: O(n)
+// Find function is constant on average and
+// worst case linear in container size
+Coord Datastructures::get_station_coordinates(StationID id)
 {
-    // Replace the line below with your implementation
-    // Also uncomment parameters ( /* param */ -> param )
-    throw NotImplemented("get_station_coordinates()");
+    auto it = stations.find(id);
+    // If station is not found
+    if(it == stations.end()){
+        return NO_COORD;
+    }
+    return it->second.coord;
 }
 
 std::vector<StationID> Datastructures::stations_alphabetically()

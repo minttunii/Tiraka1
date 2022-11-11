@@ -203,8 +203,18 @@ public:
     RegionID common_parent_of_regions(RegionID id1, RegionID id2);
 
 private:
-    // Add stuff needed for your class implementation here
+    struct Station {
+        Name name;
+        Coord coord;
+    } station;
 
+    struct Region {
+        Name name;
+        std::vector<Coord> coords;
+    } region;
+
+    std::unordered_map<StationID, Station> stations;
+    std::unordered_map<RegionID, Region> regions;
 };
 
 #endif // DATASTRUCTURES_HH
