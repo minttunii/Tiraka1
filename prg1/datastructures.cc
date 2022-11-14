@@ -67,7 +67,7 @@ bool Datastructures::add_station(StationID id, const Name& name, Coord xy)
     if(stations.count(id) == 1){
         return false;
     }
-    station.name = name; station.coord = xy;
+    station.name = name; station.coord = xy; station.id = id;
     stations.insert({id, station});
     return true;
 }
@@ -95,10 +95,19 @@ Coord Datastructures::get_station_coordinates(StationID id)
 std::vector<StationID> Datastructures::stations_alphabetically()
 {
     std::vector<StationID> stations_alph;
-    stations_alph.reserve(stations.size());
+    std::vector<Station> stations_to_order;
 
-    std::map<StationID, Station> stations2;
-    stations2.insert(stations.begin(), stations.end());
+    for(auto &i : stations){
+        stations_to_order.push_back(i.second);
+    }
+
+    sort(stations_to_order.begin(), stations_to_order.end(), [](Station &a, Station &b)-> bool{
+        return a.name < b.name;
+    });
+
+    for(auto &i : stations_to_order){
+        stations_alph.push_back(i.id);
+    }
 
     return stations_alph;
 }
@@ -148,7 +157,7 @@ bool Datastructures::add_departure(StationID stationid, TrainID trainid, Time ti
     return true;
 }
 
-bool Datastructures::remove_departure(StationID stationid, TrainID /*trainid*/, Time /*time*/)
+bool Datastructures::remove_departure(StationID stationid, TrainID trainid, Time time)
 {
     auto it = stations.find(stationid);
     if(it == stations.end()){
@@ -156,16 +165,35 @@ bool Datastructures::remove_departure(StationID stationid, TrainID /*trainid*/, 
     }
 
     auto trains = it->second.trains;
-
+    for(auto &elem : trains){
+        if(elem.first == time && elem.second == trainid){
+            trains.erase(time);
+            return true;
+        }
+    }
     return false;
 
 }
 
-std::vector<std::pair<Time, TrainID>> Datastructures::station_departures_after(StationID /*stationid*/, Time /*time*/)
+std::vector<std::pair<Time, TrainID>> Datastructures::station_departures_after(StationID stationid, Time time)
 {
-    // Replace the line below with your implementation
-    // Also uncomment parameters ( /* param */ -> param )
-    throw NotImplemented("station_departures_after()");
+    std::vector<std::pair<Time, TrainID>> departures;
+
+    auto it = stations.find(stationid);
+    // Jos asemaa ei löydy
+    if(it == stations.end()){
+        return {{NO_TIME, NO_TRAIN}};
+    }
+
+    auto trains = it->second.trains;
+    auto it2 = trains.find(time);
+
+    if(it2 != trains.end()){
+        for(auto i = it2; i != trains.end(); i++){
+            departures.push_back({i->first, i->second});
+        }
+    }
+    return departures;
 }
 
 bool Datastructures::add_region(RegionID /*id*/, const Name &/*name*/, std::vector<Coord> /*coords*/)

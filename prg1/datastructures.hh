@@ -127,11 +127,11 @@ public:
 
     // We recommend you implement the operations below only after implementing the ones above
 
-    // Estimate of performance:
+    // Estimate of performance: O(n*log(n))
     // Short rationale for estimate:
     std::vector<StationID> stations_alphabetically();
 
-    // Estimate of performance:
+    // Estimate of performance: O(n*log(n))
     // Short rationale for estimate:
     std::vector<StationID> stations_distance_increasing();
 
@@ -205,6 +205,7 @@ public:
 
 private:
     struct Station {
+        StationID id;
         Name name;
         Coord coord;
         std::multimap<Time, TrainID> trains;
