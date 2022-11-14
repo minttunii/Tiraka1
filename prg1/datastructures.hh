@@ -143,16 +143,16 @@ public:
     // Short rationale for estimate: Iterating map is linear in worst case
     bool change_station_coord(StationID id, Coord newcoord);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(n)
+    // Short rationale for estimate: Find, for loop and insert are linear in worst case
     bool add_departure(StationID stationid, TrainID trainid, Time time);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(n)
+    // Short rationale for estimate: Find, for loop and erase are linear
     bool remove_departure(StationID stationid, TrainID trainid, Time time);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(n)
+    // Short rationale for estimate: Find and creating vector in for loop are linear in worst case
     std::vector<std::pair<Time, TrainID>> station_departures_after(StationID stationid, Time time);
 
     // We recommend you implement the operations below only after implementing the ones above

@@ -108,7 +108,6 @@ std::vector<StationID> Datastructures::stations_alphabetically()
     for(auto &i : stations_to_order){
         stations_alph.push_back(i.id);
     }
-
     return stations_alph;
 }
 
