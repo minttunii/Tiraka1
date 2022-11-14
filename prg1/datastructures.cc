@@ -61,8 +61,8 @@ void Datastructures::clear_all()
 std::vector<StationID> Datastructures::all_stations()
 {
     std::vector<StationID> all_stations;
-    for(auto const& element : stations){
-        all_stations.push_back(element.first);
+    for(auto const& elem : stations){
+        all_stations.push_back(elem.first);
     }
     return all_stations;
 }
@@ -81,7 +81,7 @@ bool Datastructures::add_station(StationID id, const Name& name, Coord xy)
     return true;
 }
 
-// Estimate of performance: O(n)
+// Estimate of performance: O(n) but O(1) on average
 // Find function is constant on average and
 // worst case linear in container size
 Name Datastructures::get_station_name(StationID id)
@@ -109,28 +109,37 @@ Coord Datastructures::get_station_coordinates(StationID id)
 
 std::vector<StationID> Datastructures::stations_alphabetically()
 {
+    std::vector<StationID> stations_alph;
     // Replace the line below with your implementation
     throw NotImplemented("stations_alphabetically()");
 }
 
 std::vector<StationID> Datastructures::stations_distance_increasing()
 {
+    std::vector<StationID> stations_dist;
     // Replace the line below with your implementation
     throw NotImplemented("stations_distance_increasing()");
 }
 
-StationID Datastructures::find_station_with_coord(Coord /*xy*/)
+StationID Datastructures::find_station_with_coord(Coord xy)
 {
-    // Replace the line below with your implementation
-    // Also uncomment parameters ( /* param */ -> param )
-    throw NotImplemented("find_station_with_coord()");
+    for(auto const& elem : stations){
+        if(elem.second.coord == xy){
+            return elem.first;
+        }
+    }
+    return NO_STATION;
 }
 
-bool Datastructures::change_station_coord(StationID /*id*/, Coord /*newcoord*/)
+bool Datastructures::change_station_coord(StationID id, Coord newcoord)
 {
-    // Replace the line below with your implementation
-    // Also uncomment parameters ( /* param */ -> param )
-    throw NotImplemented("change_station_coord()");
+    for(auto &elem : stations){
+        if(elem.first == id){
+            elem.second.coord = newcoord;
+            return true;
+        }
+    }
+    return false;
 }
 
 bool Datastructures::add_departure(StationID /*stationid*/, TrainID /*trainid*/, Time /*time*/)
