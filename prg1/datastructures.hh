@@ -1,12 +1,13 @@
 // Datastructures.hh
 //
-// Student name:
-// Student email:
-// Student number:
+// Student name: Minttu Niiranen
+// Student email: minttu.niiranen@tuni.fi
+// Student number: H291834
 
 #ifndef DATASTRUCTURES_HH
 #define DATASTRUCTURES_HH
 
+#include <map>
 #include <string>
 #include <vector>
 #include <tuple>
@@ -100,28 +101,28 @@ public:
     Datastructures();
     ~Datastructures();
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(1)
+    // Short rationale for estimate: size function is constant
     unsigned int station_count();
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(n)
+    // Short rationale for estimate: clear function is linear on size
     void clear_all();
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(n)
+    // Short rationale for estimate: Iterating map is linear in worst case and vector pushback is constant
     std::vector<StationID> all_stations();
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(n)
+    // Short rationale for estimate: Count function and inserting to map is constant on average but linear in worst case.
     bool add_station(StationID id, Name const& name, Coord xy);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(n)
+    // Short rationale for estimate: Find function is constant on average and in worst case linear in container size
     Name get_station_name(StationID id);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(n)
+    // Short rationale for estimate: Find function is constant on average and in worst case linear in container size
     Coord get_station_coordinates(StationID id);
 
     // We recommend you implement the operations below only after implementing the ones above
@@ -134,12 +135,12 @@ public:
     // Short rationale for estimate:
     std::vector<StationID> stations_distance_increasing();
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(n)
+    // Short rationale for estimate: Iterating map is linear in worst case
     StationID find_station_with_coord(Coord xy);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(n)
+    // Short rationale for estimate: Iterating map is linear in worst case
     bool change_station_coord(StationID id, Coord newcoord);
 
     // Estimate of performance:
@@ -206,6 +207,7 @@ private:
     struct Station {
         Name name;
         Coord coord;
+        std::multimap<Time, TrainID> trains;
     } station;
 
     struct Region {

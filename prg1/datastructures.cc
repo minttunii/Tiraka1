@@ -28,6 +28,7 @@ Type random_in_range(Type start, Type end)
 // an operation (Commenting out parameter name prevents compiler from
 // warning about unused parameters on operations you haven't yet implemented.)
 
+
 Datastructures::Datastructures()
 {
 
@@ -38,38 +39,28 @@ Datastructures::~Datastructures()
     // Write any cleanup you need here
 }
 
-// Estimate of performance: O(1)
+
 unsigned int Datastructures::station_count()
 {
     return stations.size();
-
-    // Replace the line below with your implementation
-    //throw NotImplemented("station_count()");
-
 }
 
-//Estimate of performance: O(n)
-// Clear function is linear on size
 void Datastructures::clear_all()
 {
     stations.clear(); regions.clear();
 }
 
-// Estimate of performance: O(n)
-//Iterating map is linear in worst case and
-// inserting to vector end is constant
 std::vector<StationID> Datastructures::all_stations()
 {
     std::vector<StationID> all_stations;
+    all_stations.reserve(stations.size());
+
     for(auto const& elem : stations){
         all_stations.push_back(elem.first);
     }
     return all_stations;
 }
 
-// Estimate of performance: O(n) (worst case)
-// Count function is constant on average and linear in worst case
-// Inserting to map is constant on average and linear on worst case.
 bool Datastructures::add_station(StationID id, const Name& name, Coord xy)
 {
     // If station already exists, return false
@@ -81,9 +72,6 @@ bool Datastructures::add_station(StationID id, const Name& name, Coord xy)
     return true;
 }
 
-// Estimate of performance: O(n) but O(1) on average
-// Find function is constant on average and
-// worst case linear in container size
 Name Datastructures::get_station_name(StationID id)
 {
     auto it = stations.find(id);
@@ -94,9 +82,6 @@ Name Datastructures::get_station_name(StationID id)
     return it->second.name;
 }
 
-// Estimate of performance: O(n)
-// Find function is constant on average and
-// worst case linear in container size
 Coord Datastructures::get_station_coordinates(StationID id)
 {
     auto it = stations.find(id);
@@ -110,8 +95,12 @@ Coord Datastructures::get_station_coordinates(StationID id)
 std::vector<StationID> Datastructures::stations_alphabetically()
 {
     std::vector<StationID> stations_alph;
-    // Replace the line below with your implementation
-    throw NotImplemented("stations_alphabetically()");
+    stations_alph.reserve(stations.size());
+
+    std::map<StationID, Station> stations2;
+    stations2.insert(stations.begin(), stations.end());
+
+    return stations_alph;
 }
 
 std::vector<StationID> Datastructures::stations_distance_increasing()
@@ -142,18 +131,34 @@ bool Datastructures::change_station_coord(StationID id, Coord newcoord)
     return false;
 }
 
-bool Datastructures::add_departure(StationID /*stationid*/, TrainID /*trainid*/, Time /*time*/)
+bool Datastructures::add_departure(StationID stationid, TrainID trainid, Time time)
 {
-    // Replace the line below with your implementation
-    // Also uncomment parameters ( /* param */ -> param )
-    throw NotImplemented("add_departure()");
+    auto it = stations.find(stationid);
+    if(it == stations.end()){
+        return false;
+    }
+
+    auto trains = it->second.trains;
+    for(auto &elem : trains){
+        if(elem.first == time && elem.second == trainid){
+            return false;
+        }
+    }
+    trains.insert({time, trainid});
+    return true;
 }
 
-bool Datastructures::remove_departure(StationID /*stationid*/, TrainID /*trainid*/, Time /*time*/)
+bool Datastructures::remove_departure(StationID stationid, TrainID /*trainid*/, Time /*time*/)
 {
-    // Replace the line below with your implementation
-    // Also uncomment parameters ( /* param */ -> param )
-    throw NotImplemented("remove_departure()");
+    auto it = stations.find(stationid);
+    if(it == stations.end()){
+        return false;
+    }
+
+    auto trains = it->second.trains;
+
+    return false;
+
 }
 
 std::vector<std::pair<Time, TrainID>> Datastructures::station_departures_after(StationID /*stationid*/, Time /*time*/)
