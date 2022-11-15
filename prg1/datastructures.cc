@@ -7,7 +7,7 @@
 #include "datastructures.hh"
 
 #include <random>
-
+#include <iostream>
 #include <cmath>
 
 std::minstd_rand rand_engine; // Reasonably quick pseudo-random generator
@@ -147,12 +147,17 @@ bool Datastructures::add_departure(StationID stationid, TrainID trainid, Time ti
     }
 
     auto trains = it->second.trains;
-    for(auto &elem : trains){
-        if(elem.first == time && elem.second == trainid){
-            return false;
+    auto it2 = trains.find(time);
+    // Tarkistetaan löytyykö jo vastaavaa junavuoroa
+    if(it2 != trains.end()){
+        for(auto i = it2; i != trains.end(); i++){
+            if(i->first == time && i->second == trainid){
+                return false;
+            }
         }
     }
     trains.insert({time, trainid});
+    it->second.trains = trains;
     return true;
 }
 
@@ -164,14 +169,17 @@ bool Datastructures::remove_departure(StationID stationid, TrainID trainid, Time
     }
 
     auto trains = it->second.trains;
-    for(auto &elem : trains){
-        if(elem.first == time && elem.second == trainid){
-            trains.erase(time);
-            return true;
+    auto it2 = trains.find(time);
+    // Tarkistetaan löytyykö poistettavaa junavuoroa
+    if(it2 != trains.end()){
+        for(auto i = it2; i != trains.end(); i++){
+            if(i->first == time && i->second == trainid){
+                trains.erase(i);
+                return true;
+            }
         }
     }
     return false;
-
 }
 
 std::vector<std::pair<Time, TrainID>> Datastructures::station_departures_after(StationID stationid, Time time)
@@ -179,14 +187,12 @@ std::vector<std::pair<Time, TrainID>> Datastructures::station_departures_after(S
     std::vector<std::pair<Time, TrainID>> departures;
 
     auto it = stations.find(stationid);
-    // Jos asemaa ei löydy
     if(it == stations.end()){
         return {{NO_TIME, NO_TRAIN}};
     }
 
     auto trains = it->second.trains;
     auto it2 = trains.find(time);
-
     if(it2 != trains.end()){
         for(auto i = it2; i != trains.end(); i++){
             departures.push_back({i->first, i->second});

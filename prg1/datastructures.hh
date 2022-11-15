@@ -148,7 +148,7 @@ public:
     bool add_departure(StationID stationid, TrainID trainid, Time time);
 
     // Estimate of performance: O(n)
-    // Short rationale for estimate: Find, for loop and erase are linear
+    // Short rationale for estimate: Find, for loop and erase are linear in worst case
     bool remove_departure(StationID stationid, TrainID trainid, Time time);
 
     // Estimate of performance: O(n)
