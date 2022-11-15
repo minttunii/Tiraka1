@@ -115,6 +115,7 @@ public:
 
     // Estimate of performance: O(n)
     // Short rationale for estimate: Count function and inserting to map is constant on average but linear in worst case.
+    // Pushback to vector is constant unless it needs relocating
     bool add_station(StationID id, Name const& name, Coord xy);
 
     // Estimate of performance: O(n)
@@ -128,11 +129,11 @@ public:
     // We recommend you implement the operations below only after implementing the ones above
 
     // Estimate of performance: O(n*log(n))
-    // Short rationale for estimate:
+    // Short rationale for estimate: Sort function is nlog(n) and creating vector is linear in general case
     std::vector<StationID> stations_alphabetically();
 
     // Estimate of performance: O(n*log(n))
-    // Short rationale for estimate:
+    // Short rationale for estimate: Sort function is nlog(n) and creating vector is linear in general case
     std::vector<StationID> stations_distance_increasing();
 
     // Estimate of performance: O(n)
@@ -205,7 +206,6 @@ public:
 
 private:
     struct Station {
-        StationID id;
         Name name;
         Coord coord;
         std::multimap<Time, TrainID> trains;
@@ -218,6 +218,8 @@ private:
 
     std::unordered_map<StationID, Station> stations;
     std::unordered_map<RegionID, Region> regions;
+    std::vector<std::pair<StationID,Station>> stations_to_order;
+    bool sort_by_coord(std::pair<StationID, Station>, std::pair<StationID, Station>);
 };
 
 #endif // DATASTRUCTURES_HH

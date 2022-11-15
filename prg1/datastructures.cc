@@ -1,8 +1,8 @@
 // Datastructures.cc
 //
-// Student name:
-// Student email:
-// Student number:
+// Student name: Minttu Niiranen
+// Student email: minttu.niiranen@tuni.fi
+// Student number: 0408538846
 
 #include "datastructures.hh"
 
@@ -67,8 +67,10 @@ bool Datastructures::add_station(StationID id, const Name& name, Coord xy)
     if(stations.count(id) == 1){
         return false;
     }
-    station.name = name; station.coord = xy; station.id = id;
+    station.name = name; station.coord = xy; //station.id = id;
+    //station.dist = sqrt(pow(xy.x,2)+pow(xy.y,2));
     stations.insert({id, station});
+    stations_to_order.push_back({id, station});
     return true;
 }
 
@@ -95,18 +97,13 @@ Coord Datastructures::get_station_coordinates(StationID id)
 std::vector<StationID> Datastructures::stations_alphabetically()
 {
     std::vector<StationID> stations_alph;
-    std::vector<Station> stations_to_order;
 
-    for(auto &i : stations){
-        stations_to_order.push_back(i.second);
-    }
-
-    sort(stations_to_order.begin(), stations_to_order.end(), [](Station &a, Station &b)-> bool{
-        return a.name < b.name;
+    sort(stations_to_order.begin(), stations_to_order.end(), [](const std::pair<StationID, Station> &a, const std::pair<StationID, Station> &b)-> bool{
+        return a.second.name < b.second.name;
     });
 
     for(auto &i : stations_to_order){
-        stations_alph.push_back(i.id);
+        stations_alph.push_back(i.first);
     }
     return stations_alph;
 }
@@ -114,8 +111,16 @@ std::vector<StationID> Datastructures::stations_alphabetically()
 std::vector<StationID> Datastructures::stations_distance_increasing()
 {
     std::vector<StationID> stations_dist;
-    // Replace the line below with your implementation
-    throw NotImplemented("stations_distance_increasing()");
+    sort(stations_to_order.begin(), stations_to_order.end(), [](const std::pair<StationID, Station> &a, const std::pair<StationID, Station> &b) -> bool{
+        int xa = a.second.coord.x; int ya = a.second.coord.y; int xb = b.second.coord.x; int yb = b.second.coord.y;
+        if(sqrt(xa*xa+ya*ya) == sqrt(xb*xb+yb*yb)){ return ya < yb;}
+        return sqrt(xa*xa+ya*ya) < sqrt(xb*xb+yb*yb);
+    });
+
+    for(auto &i : stations_to_order){
+        stations_dist.push_back(i.first);
+    }
+    return stations_dist;
 }
 
 StationID Datastructures::find_station_with_coord(Coord xy)
