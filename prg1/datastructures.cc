@@ -55,7 +55,6 @@ void Datastructures::clear_all()
 std::vector<StationID> Datastructures::all_stations()
 {
     std::vector<StationID> all_stations;
-    all_stations.reserve(stations.size());
 
     for(auto const& elem : stations){
         all_stations.push_back(elem.first);
@@ -69,8 +68,7 @@ bool Datastructures::add_station(StationID id, const Name& name, Coord xy)
     if(stations.count(id) == 1){
         return false;
     }
-    station.name = name; station.coord = xy; //station.id = id;
-    //station.dist = sqrt(pow(xy.x,2)+pow(xy.y,2));
+    station.name = name; station.coord = xy;
     stations.insert({id, station});
     stations_to_order.push_back({id, station});
     return true;
@@ -137,13 +135,19 @@ StationID Datastructures::find_station_with_coord(Coord xy)
 
 bool Datastructures::change_station_coord(StationID id, Coord newcoord)
 {
-    for(auto &elem : stations){
+    auto it = stations.find(id);
+    if(it == stations.end()){
+        return false;
+    }
+    it->second.coord = newcoord;
+    // Muutos täytyy päivittää myös toiseen tietorakenteeseen
+    for(auto &elem : stations_to_order){
         if(elem.first == id){
             elem.second.coord = newcoord;
             return true;
         }
     }
-    return false;
+    return true;
 }
 
 bool Datastructures::add_departure(StationID stationid, TrainID trainid, Time time)
@@ -199,40 +203,50 @@ std::vector<std::pair<Time, TrainID>> Datastructures::station_departures_after(S
     }
 
     auto trains = it->second.trains;
-    auto it2 = trains.find(time);
-    if(it2 != trains.end()){
-        for(auto i = it2; i != trains.end(); i++){
-            departures.push_back({i->first, i->second});
+    for(auto &elem : trains){
+        if(elem.first >= time){
+            departures.push_back({elem.first, elem.second});
         }
     }
     return departures;
 }
 
-bool Datastructures::add_region(RegionID /*id*/, const Name &/*name*/, std::vector<Coord> /*coords*/)
+bool Datastructures::add_region(RegionID id, const Name &name, std::vector<Coord> coords)
 {
-    // Replace the line below with your implementation
-    // Also uncomment parameters ( /* param */ -> param )
-    throw NotImplemented("add_region()");
+    auto it = regions.find(id);
+    if(it != regions.end()){
+        return false;
+    }
+    region.name = name; region.coords = coords;
+    regions.insert({id, region});
+    return true;
 }
 
 std::vector<RegionID> Datastructures::all_regions()
 {
-    // Replace the line below with your implementation
-    throw NotImplemented("all_regions()");
+    std::vector<RegionID> all_regions;
+    for(auto &elem : regions){
+        all_regions.push_back(elem.first);
+    }
+    return all_regions;
 }
 
-Name Datastructures::get_region_name(RegionID /*id*/)
+Name Datastructures::get_region_name(RegionID id)
 {
-    // Replace the line below with your implementation
-    // Also uncomment parameters ( /* param */ -> param )
-    throw NotImplemented("get_region_name()");
+    auto it = regions.find(id);
+    if(it == regions.end()){
+        return NO_NAME;
+    }
+    return it->second.name;
 }
 
-std::vector<Coord> Datastructures::get_region_coords(RegionID /*id*/)
+std::vector<Coord> Datastructures::get_region_coords(RegionID id)
 {
-    // Replace the line below with your implementation
-    // Also uncomment parameters ( /* param */ -> param )
-    throw NotImplemented("get_region_coords()");
+    auto it = regions.find(id);
+    if(it == regions.end()){
+        return {NO_COORD};
+    }
+    return it->second.coords;
 }
 
 bool Datastructures::add_subregion_to_region(RegionID /*id*/, RegionID /*parentid*/)

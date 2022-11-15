@@ -142,6 +142,7 @@ public:
 
     // Estimate of performance: O(n)
     // Short rationale for estimate: Iterating map is linear in worst case
+    // The change need to be added to vector, wich is linear in worst case
     bool change_station_coord(StationID id, Coord newcoord);
 
     // Estimate of performance: O(n)
