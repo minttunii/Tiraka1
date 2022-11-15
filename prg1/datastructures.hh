@@ -219,7 +219,6 @@ private:
     std::unordered_map<StationID, Station> stations;
     std::unordered_map<RegionID, Region> regions;
     std::vector<std::pair<StationID,Station>> stations_to_order;
-    bool sort_by_coord(std::pair<StationID, Station>, std::pair<StationID, Station>);
 };
 
 #endif // DATASTRUCTURES_HH
