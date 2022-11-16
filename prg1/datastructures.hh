@@ -146,45 +146,47 @@ public:
     bool change_station_coord(StationID id, Coord newcoord);
 
     // Estimate of performance: O(n)
-    // Short rationale for estimate: Find, for loop and insert are linear in worst case
+    // Short rationale for estimate: For loop is linear in worst case. Insert and find are logarithmic.
     bool add_departure(StationID stationid, TrainID trainid, Time time);
 
     // Estimate of performance: O(n)
-    // Short rationale for estimate: Find, for loop and erase are linear in worst case
+    // Short rationale for estimate: Find is logaritmhmic and for loop is linear in worst case. Erase is constant.
     bool remove_departure(StationID stationid, TrainID trainid, Time time);
 
     // Estimate of performance: O(n)
-    // Short rationale for estimate: Find and creating vector in for loop are linear in worst case
+    // Short rationale for estimate: Find is logarithmic and creating vector in for loop is linear
     std::vector<std::pair<Time, TrainID>> station_departures_after(StationID stationid, Time time);
 
     // We recommend you implement the operations below only after implementing the ones above
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(n)
+    // Short rationale for estimate: Find function and insert are linear in worst case but
+    // insert is constant on average
     bool add_region(RegionID id, Name const& name, std::vector<Coord> coords);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(n)
+    // Short rationale for estimate: For loop is linear and vector pushback and empty function is constant
     std::vector<RegionID> all_regions();
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(n)
+    // Short rationale for estimate: Find function is linear in worst case
     Name get_region_name(RegionID id);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(n)
+    // Short rationale for estimate: Find function is linear in worst case
     std::vector<Coord> get_region_coords(RegionID id);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(n)
+    // Short rationale for estimate: Find function is linear at worst case but constant on average.
     bool add_subregion_to_region(RegionID id, RegionID parentid);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(n)
+    // Short rationale for estimate: Find function is linear at worst case but constant on average.
     bool add_station_to_region(StationID id, RegionID parentid);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(n)
+    // Short rationale for estimate: Find is linear in worst case and constant on average. While loop
+    // can be linear. Vector pushback is constant on average.
     std::vector<RegionID> station_in_regions(StationID id);
 
     // Non-compulsory operations
@@ -210,16 +212,20 @@ private:
         Name name;
         Coord coord;
         std::multimap<Time, TrainID> trains;
+        RegionID upper_id;
     } station;
 
     struct Region {
         Name name;
         std::vector<Coord> coords;
+        std::vector<std::pair<RegionID, Region>*> sub_regions;
+        std::pair<RegionID, Region>* upper_region;
+        std::vector<StationID> stations_in_region;
     } region;
 
     std::unordered_map<StationID, Station> stations;
     std::unordered_map<RegionID, Region> regions;
-    std::vector<std::pair<StationID,Station>> stations_to_order;
+    std::vector<std::pair<StationID, Station>> stations_to_order;
 };
 
 #endif // DATASTRUCTURES_HH
