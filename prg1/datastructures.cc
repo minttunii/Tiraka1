@@ -65,7 +65,7 @@ std::vector<StationID> Datastructures::all_stations()
 bool Datastructures::add_station(StationID id, const Name& name, Coord xy)
 {
     // If station already exists, return false
-    if(stations.count(id) == 1){
+    if(stations.find(id) != stations.end()){
         return false;
     }
     station.name = name; station.coord = xy;
@@ -97,29 +97,49 @@ Coord Datastructures::get_station_coordinates(StationID id)
 std::vector<StationID> Datastructures::stations_alphabetically()
 {
     std::vector<StationID> stations_alph;
+    stations_alph.reserve(stations.size());
+    std::map<Name, StationID> stations_name_order;
 
-    sort(stations_to_order.begin(), stations_to_order.end(), [](const std::pair<StationID, Station> &a, const std::pair<StationID, Station> &b)-> bool{
+    for(auto &elem: stations){
+        stations_name_order.insert({elem.second.name, elem.first});
+    }
+
+    std::transform (stations_name_order.begin(), stations_name_order.end(),
+                    back_inserter(stations_alph), [] (std::pair<Name, StationID> const & pair){
+                    return pair.second;});
+
+   /* sort(stations_to_order.begin(), stations_to_order.end(), [](const std::pair<StationID, Station> &a, const std::pair<StationID, Station> &b)-> bool{
         return a.second.name < b.second.name;
     });
 
     for(auto &i : stations_to_order){
         stations_alph.push_back(i.first);
+
+    for(auto &elem : stations_name_order){
+        stations_alph.push_back(elem.second);
     }
+    }*/
+
     return stations_alph;
 }
 
 std::vector<StationID> Datastructures::stations_distance_increasing()
 {
     std::vector<StationID> stations_dist;
+
     sort(stations_to_order.begin(), stations_to_order.end(), [](const std::pair<StationID, Station> &a, const std::pair<StationID, Station> &b) -> bool{
         int xa = a.second.coord.x; int ya = a.second.coord.y; int xb = b.second.coord.x; int yb = b.second.coord.y;
-        if(sqrt(xa*xa+ya*ya) == sqrt(xb*xb+yb*yb)){ return ya < yb;}
-        return sqrt(xa*xa+ya*ya) < sqrt(xb*xb+yb*yb);
+        if(xa*xa+ya*ya == xb*xb+yb*yb){ return ya < yb;}
+        return xa*xa+ya*ya < xb*xb+yb*yb;
     });
 
-    for(auto &i : stations_to_order){
+    std::transform (stations_to_order.begin(), stations_to_order.end(),
+                    back_inserter(stations_dist), [] (std::pair<StationID, Station> const & pair){
+                    return pair.first;});
+
+    /*for(auto &i : stations_to_order){
         stations_dist.push_back(i.first);
-    }
+    }*/
     return stations_dist;
 }
 
@@ -139,6 +159,7 @@ bool Datastructures::change_station_coord(StationID id, Coord newcoord)
     if(it == stations.end()){
         return false;
     }
+
     it->second.coord = newcoord;
     // Muutos täytyy päivittää myös toiseen tietorakenteeseen
     for(auto &elem : stations_to_order){
