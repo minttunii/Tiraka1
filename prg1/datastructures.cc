@@ -38,6 +38,7 @@ Datastructures::Datastructures()
 Datastructures::~Datastructures()
 {
     // Write any cleanup you need here
+
 }
 
 
@@ -265,10 +266,10 @@ bool Datastructures::add_subregion_to_region(RegionID id, RegionID parentid)
         return false;
     }
     //Luodaan osoitin ylempään alueeseen ja lisätään alialueeseen
-    std::pair<RegionID, Region>* parent = new std::pair<RegionID, Region>(it2->first, it2->second);
+    std::pair<const RegionID, Region>* parent = &(*it2);
     it->second.upper_region = parent;
     // Luodaan osoitin alialuesseen ja lisätään se ylempään alueeseen
-    std::pair<RegionID, Region>* sub = new std::pair<RegionID, Region>(it->first, it->second);
+    std::pair<const RegionID, Region>* sub = &(*it);
     it2->second.sub_regions.push_back(sub);
     return true;
 }
@@ -298,18 +299,19 @@ std::vector<RegionID> Datastructures::station_in_regions(StationID id)
         return {};
     }
 
-    /*std::vector<RegionID> station_regions;
-    station_regions.push_back(it->second.upper_id);
+    std::vector<RegionID> station_regions;
+    station_regions.push_back(it->second->upper_id);
+
     // Etsitään alue ja sen ylemmän alueet
-    auto it2 = regions.find(it->second.upper_id);
+    auto it2 = regions.find(it->second->upper_id);
     auto iter = it2->second.upper_region;
+
     while(iter != nullptr){
         station_regions.push_back(iter->first);
-        iter = nullptr;
+        iter = iter->second.upper_region;
     }
-    return station_regions;*/
-
-    return {};
+    delete iter;
+    return station_regions;
 }
 
 std::vector<RegionID> Datastructures::all_subregions_of_region(RegionID /*id*/)

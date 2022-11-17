@@ -181,6 +181,7 @@ public:
 
     // Estimate of performance: O(n)
     // Short rationale for estimate: Find function is linear at worst case but constant on average.
+    // Vector pushback is constant but linear in worst case.
     bool add_subregion_to_region(RegionID id, RegionID parentid);
 
     // Estimate of performance: O(n)
@@ -189,7 +190,7 @@ public:
 
     // Estimate of performance: O(n)
     // Short rationale for estimate: Find is linear in worst case and constant on average. While loop
-    // can be linear. Vector pushback is constant on average.
+    // can be linear. Vector pushback is constant but linear in worst case..
     std::vector<RegionID> station_in_regions(StationID id);
 
     // Non-compulsory operations
@@ -221,8 +222,8 @@ private:
     struct Region {
         Name name;
         std::vector<Coord> coords;
-        std::vector<std::pair<RegionID, Region>*> sub_regions;
-        std::pair<RegionID, Region>* upper_region;
+        std::vector<std::pair<const RegionID, Region>*> sub_regions;
+        std::pair<const RegionID, Region>* upper_region = nullptr;
         std::vector<StationID> stations_in_region;
     } region;
 
