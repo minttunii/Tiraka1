@@ -6,6 +6,7 @@
 
 #include "datastructures.hh"
 
+#include <memory>
 #include <random>
 #include <iostream>
 #include <cmath>
@@ -69,8 +70,9 @@ bool Datastructures::add_station(StationID id, const Name& name, Coord xy)
         return false;
     }
     station.name = name; station.coord = xy;
-    stations.insert({id, station});
-    stations_to_order.push_back({id, station});
+    std::shared_ptr<Station> station_ptr = std::make_shared<Station>(station);
+    stations.insert({id, station_ptr});
+    stations_to_order.push_back({id, station_ptr});
     return true;
 }
 
@@ -81,7 +83,7 @@ Name Datastructures::get_station_name(StationID id)
     if(it == stations.end()){
         return NO_NAME;
     }
-    return it->second.name;
+    return it->second->name;
 }
 
 Coord Datastructures::get_station_coordinates(StationID id)
@@ -91,62 +93,44 @@ Coord Datastructures::get_station_coordinates(StationID id)
     if(it == stations.end()){
         return NO_COORD;
     }
-    return it->second.coord;
+    return it->second->coord;
 }
 
 std::vector<StationID> Datastructures::stations_alphabetically()
 {
     std::vector<StationID> stations_alph;
     stations_alph.reserve(stations.size());
-    std::map<Name, StationID> stations_name_order;
 
-    for(auto &elem: stations){
-        stations_name_order.insert({elem.second.name, elem.first});
-    }
+    sort(stations_to_order.begin(), stations_to_order.end(), [](const std::pair<StationID, std::shared_ptr<Station>> &a, const std::pair<StationID, std::shared_ptr<Station>> &b)-> bool{
+            return a.second->name < b.second->name; });
 
-    std::transform (stations_name_order.begin(), stations_name_order.end(),
-                    back_inserter(stations_alph), [] (std::pair<Name, StationID> const & pair){
-                    return pair.second;});
-
-   /* sort(stations_to_order.begin(), stations_to_order.end(), [](const std::pair<StationID, Station> &a, const std::pair<StationID, Station> &b)-> bool{
-        return a.second.name < b.second.name;
-    });
-
-    for(auto &i : stations_to_order){
-        stations_alph.push_back(i.first);
-
-    for(auto &elem : stations_name_order){
-        stations_alph.push_back(elem.second);
-    }
-    }*/
-
+    std::transform (stations_to_order.begin(), stations_to_order.end(),
+                    back_inserter(stations_alph), [] (std::pair<StationID, std::shared_ptr<Station>> const & pair){
+                    return pair.first;});
     return stations_alph;
 }
 
 std::vector<StationID> Datastructures::stations_distance_increasing()
 {
     std::vector<StationID> stations_dist;
+    stations_dist.reserve(stations.size());
 
-    sort(stations_to_order.begin(), stations_to_order.end(), [](const std::pair<StationID, Station> &a, const std::pair<StationID, Station> &b) -> bool{
-        int xa = a.second.coord.x; int ya = a.second.coord.y; int xb = b.second.coord.x; int yb = b.second.coord.y;
+    sort(stations_to_order.begin(), stations_to_order.end(), [](const std::pair<StationID, std::shared_ptr<Station>> &a, const std::pair<StationID, std::shared_ptr<Station>> &b) -> bool{
+        int xa = a.second->coord.x; int ya = a.second->coord.y; int xb = b.second->coord.x; int yb = b.second->coord.y;
         if(xa*xa+ya*ya == xb*xb+yb*yb){ return ya < yb;}
         return xa*xa+ya*ya < xb*xb+yb*yb;
     });
 
     std::transform (stations_to_order.begin(), stations_to_order.end(),
-                    back_inserter(stations_dist), [] (std::pair<StationID, Station> const & pair){
+                    back_inserter(stations_dist), [] (std::pair<StationID, std::shared_ptr<Station>> const & pair){
                     return pair.first;});
-
-    /*for(auto &i : stations_to_order){
-        stations_dist.push_back(i.first);
-    }*/
     return stations_dist;
 }
 
 StationID Datastructures::find_station_with_coord(Coord xy)
 {
     for(auto const& elem : stations){
-        if(elem.second.coord == xy){
+        if(elem.second->coord == xy){
             return elem.first;
         }
     }
@@ -159,15 +143,7 @@ bool Datastructures::change_station_coord(StationID id, Coord newcoord)
     if(it == stations.end()){
         return false;
     }
-
-    it->second.coord = newcoord;
-    // Muutos täytyy päivittää myös toiseen tietorakenteeseen
-    for(auto &elem : stations_to_order){
-        if(elem.first == id){
-            elem.second.coord = newcoord;
-            return true;
-        }
-    }
+    it->second->coord = newcoord;
     return true;
 }
 
@@ -177,19 +153,22 @@ bool Datastructures::add_departure(StationID stationid, TrainID trainid, Time ti
     if(it == stations.end()){
         return false;
     }
-
-    auto trains = it->second.trains;
+    auto trains = it->second->trains;
     auto it2 = trains.find(time);
-    // Tarkistetaan löytyykö jo vastaavaa junavuoroa
+
+    // Tarkistetaan löytyykö jo vastaavaa junavuoroa, sillä samoja kellonaikoja voi olla useita
     if(it2 != trains.end()){
         for(auto i = it2; i != trains.end(); i++){
             if(i->first == time && i->second == trainid){
                 return false;
             }
+            else if(i->first != time){
+                break;
+            }
         }
     }
     trains.insert({time, trainid});
-    it->second.trains = trains;
+    it->second->trains = trains;
     return true;
 }
 
@@ -200,14 +179,14 @@ bool Datastructures::remove_departure(StationID stationid, TrainID trainid, Time
         return false;
     }
 
-    auto trains = it->second.trains;
+    auto trains = it->second->trains;
     auto it2 = trains.find(time);
     // Tarkistetaan löytyykö poistettavaa junavuoroa
     if(it2 != trains.end()){
         for(auto i = it2; i != trains.end(); i++){
             if(i->first == time && i->second == trainid){
                 trains.erase(i);
-                it->second.trains = trains;
+                it->second->trains = trains;
                 return true;
             }
         }
@@ -224,7 +203,7 @@ std::vector<std::pair<Time, TrainID>> Datastructures::station_departures_after(S
         return {{NO_TIME, NO_TRAIN}};
     }
 
-    auto trains = it->second.trains;
+    auto trains = it->second->trains;
     for(auto &elem : trains){
         if(elem.first >= time){
             departures.push_back({elem.first, elem.second});
@@ -299,11 +278,11 @@ bool Datastructures::add_station_to_region(StationID id, RegionID parentid)
     auto it = stations.find(id);
     auto it2 = regions.find(parentid);
     // Jos asemaa tai aluetta ei ole tai asema kuuluu jo alueeseen
-    if(it == stations.end() || it2 == regions.end() || it->second.upper_id == 0){
+    if(it == stations.end() || it2 == regions.end() || it->second->upper_id == 0){
         return false;
     }
     it2->second.stations_in_region.push_back(id);
-    it->second.upper_id = parentid;
+    it->second->upper_id = parentid;
     return true;
 }
 
@@ -315,7 +294,7 @@ std::vector<RegionID> Datastructures::station_in_regions(StationID id)
         return {NO_REGION};
     }
     // Jos asema ei kuulu alueeseen
-    else if(it->second.upper_id == 0){
+    else if(it->second->upper_id == 0){
         return {};
     }
 

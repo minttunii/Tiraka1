@@ -8,6 +8,7 @@
 #define DATASTRUCTURES_HH
 
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 #include <tuple>
@@ -130,10 +131,12 @@ public:
 
     // Estimate of performance: O(n*log(n))
     // Short rationale for estimate: Sort function is nlog(n) and creating vector is linear in general case
+    // Reserve is linear at most if reallocating happens
     std::vector<StationID> stations_alphabetically();
 
     // Estimate of performance: O(n*log(n))
     // Short rationale for estimate: Sort function is nlog(n) and creating vector is linear in general case
+    // Reserve is linear at most if reallocating happens
     std::vector<StationID> stations_distance_increasing();
 
     // Estimate of performance: O(n)
@@ -141,12 +144,12 @@ public:
     StationID find_station_with_coord(Coord xy);
 
     // Estimate of performance: O(n)
-    // Short rationale for estimate: Iterating map is linear in worst case
-    // The change need to be added to vector, wich is linear in worst case
+    // Short rationale for estimate: Find is linear in worst case but average on constant
     bool change_station_coord(StationID id, Coord newcoord);
 
-    // Estimate of performance: O(n)
-    // Short rationale for estimate: For loop is linear in worst case. Insert and find are logarithmic.
+    // Estimate of performance: O(log(n))
+    // Short rationale for estimate: For loop is linear in worst case but on average is constant since the loop breaks.
+    // Insert and find are logarithmic.
     bool add_departure(StationID stationid, TrainID trainid, Time time);
 
     // Estimate of performance: O(n)
@@ -223,9 +226,10 @@ private:
         std::vector<StationID> stations_in_region;
     } region;
 
-    std::unordered_map<StationID, Station> stations;
+    //std::unordered_map<StationID, Station> stations;
+    std::unordered_map<StationID, std::shared_ptr<Station>> stations;
     std::unordered_map<RegionID, Region> regions;
-    std::vector<std::pair<StationID, Station>> stations_to_order;
+    std::vector<std::pair<StationID, std::shared_ptr<Station>>> stations_to_order;
 };
 
 #endif // DATASTRUCTURES_HH
