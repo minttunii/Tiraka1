@@ -216,7 +216,7 @@ private:
         Name name;
         Coord coord;
         std::multimap<Time, TrainID> trains;
-        RegionID upper_id;
+        RegionID upper_id = 0;
     } station;
 
     struct Region {

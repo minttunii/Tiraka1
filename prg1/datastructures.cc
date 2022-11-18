@@ -279,9 +279,10 @@ bool Datastructures::add_station_to_region(StationID id, RegionID parentid)
     auto it = stations.find(id);
     auto it2 = regions.find(parentid);
     // Jos asemaa tai aluetta ei ole tai asema kuuluu jo alueeseen
-    if(it == stations.end() || it2 == regions.end() || it->second->upper_id == 0){
+    if(it == stations.end() || it2 == regions.end() || it->second->upper_id != 0){
         return false;
     }
+
     it2->second.stations_in_region.push_back(id);
     it->second->upper_id = parentid;
     return true;
@@ -300,16 +301,19 @@ std::vector<RegionID> Datastructures::station_in_regions(StationID id)
     }
 
     std::vector<RegionID> station_regions;
-    station_regions.push_back(it->second->upper_id);
 
-    // Etsitään alue ja sen ylemmän alueet
+    // Etsitään alue johon asema kuuluu
     auto it2 = regions.find(it->second->upper_id);
+    station_regions.push_back(it2->first);
+
+    // Etsitään ylemmät alueet osoittimien avulla
     auto iter = it2->second.upper_region;
 
     while(iter != nullptr){
         station_regions.push_back(iter->first);
         iter = iter->second.upper_region;
     }
+
     delete iter;
     return station_regions;
 }
