@@ -105,9 +105,13 @@ std::vector<StationID> Datastructures::stations_alphabetically()
     sort(stations_to_order.begin(), stations_to_order.end(), [](const std::pair<StationID, std::shared_ptr<Station>> &a, const std::pair<StationID, std::shared_ptr<Station>> &b)-> bool{
             return a.second->name < b.second->name; });
 
-    std::transform (stations_to_order.begin(), stations_to_order.end(),
+    for(auto const &elem : stations_to_order){
+        stations_alph.push_back(elem.first);
+    }
+
+    /*std::transform(stations_to_order.begin(), stations_to_order.end(),
                     back_inserter(stations_alph), [] (std::pair<StationID, std::shared_ptr<Station>> const & pair){
-                    return pair.first;});
+                    return pair.first;});*/
     return stations_alph;
 }
 
@@ -313,16 +317,28 @@ std::vector<RegionID> Datastructures::station_in_regions(StationID id)
         station_regions.push_back(iter->first);
         iter = iter->second.upper_region;
     }
-
     delete iter;
     return station_regions;
 }
 
-std::vector<RegionID> Datastructures::all_subregions_of_region(RegionID /*id*/)
+
+std::vector<RegionID> Datastructures::all_subregions_of_region(RegionID id)
 {
-    // Replace the line below with your implementation
-    // Also uncomment parameters ( /* param */ -> param )
-    throw NotImplemented("all_subregions_of_region()");
+    auto it = regions.find(id);
+    // Jos aluetta ei löydy
+    if(it == regions.end()){
+        return {NO_REGION};
+    }
+    // Jos alueella ei ole alialueita
+    else if(it->second.sub_regions.empty()){
+        return {};
+    }
+
+    std::vector<RegionID> subregions;
+    for(auto const &sub : it->second.sub_regions){
+        subregions.push_back(sub->first);
+    }
+    return subregions;
 }
 
 std::vector<StationID> Datastructures::stations_closest_to(Coord /*xy*/)
