@@ -270,7 +270,7 @@ bool Datastructures::add_subregion_to_region(RegionID id, RegionID parentid)
     it->second.upper_region = parent;
     // Luodaan osoitin alialuesseen ja lisätään se ylempään alueeseen
     std::pair<const RegionID, Region>* sub = &(*it);
-    it2->second.sub_regions.push_back(sub);
+    it2->second.sub_regions.insert(sub);
     return true;
 }
 
@@ -282,8 +282,8 @@ bool Datastructures::add_station_to_region(StationID id, RegionID parentid)
     if(it == stations.end() || it2 == regions.end() || it->second->upper_id != 0){
         return false;
     }
-
-    it2->second.stations_in_region.push_back(id);
+    it2->second.stations_in_region.insert(id);
+    //it2->second.stations_in_region.push_back(id);
     it->second->upper_id = parentid;
     return true;
 }
@@ -317,15 +317,15 @@ std::vector<RegionID> Datastructures::station_in_regions(StationID id)
     return station_regions;
 }
 
-std::vector<RegionID> Datastructures::subregions(std::vector<std::pair<const RegionID, Region>*> sub_regions,
+std::vector<RegionID> Datastructures::subregions(std::unordered_set<std::pair<const RegionID, Region>*> sub_regions,
                                                  std::vector<RegionID>& sub_IDs){
     if(sub_regions.empty()){
         return sub_IDs;
     }
-
-    for(auto const &sub : sub_regions){
-        sub_IDs.push_back(sub->first);
-        subregions(sub->second.sub_regions, sub_IDs);
+    // Lisätään alialueiden id vektoriin ja etsitään rekursiivisesti alialueiden alialueita
+    for(auto item = sub_regions.begin(); item != sub_regions.end(); item++){
+        sub_IDs.push_back((*item)->first);
+        subregions((*item)->second.sub_regions, sub_IDs);
     }
     return sub_IDs;
 }
@@ -371,17 +371,18 @@ bool Datastructures::remove_station(StationID id)
     if(it == stations.end()){
         return false;
     }
+
+    //Asema täytyy poistaa aseman alueen tiedoista
     if(it->second->upper_id != 0){
         auto it2 = regions.find(it->second->upper_id);
         auto stations_in_region = it2->second.stations_in_region;
-        for(auto i = stations_in_region.begin(); i != stations_in_region.end(); i++){
-            if(*i == id){
-                stations_in_region.erase(i);
-                it2->second.stations_in_region = stations_in_region;
-                break;
-            }
+        auto iter = stations_in_region.find(id);
+        if(iter != stations_in_region.end()){
+            stations_in_region.erase(iter);
+            it2->second.stations_in_region = stations_in_region;
         }
     }
+    //Aseman poistaminen stations_to_order vektorista
     for(auto i = stations_to_order.begin(); i != stations_to_order.end(); i++){
         if(i->first == id){
             stations_to_order.erase(i);

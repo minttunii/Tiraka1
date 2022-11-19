@@ -10,6 +10,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <unordered_set>
 #include <vector>
 #include <tuple>
 #include <utility>
@@ -224,15 +225,17 @@ private:
     struct Region {
         Name name;
         std::vector<Coord> coords;
-        std::vector<std::pair<const RegionID, Region>*> sub_regions;
+        //std::vector<std::pair<const RegionID, Region>*> sub_regions;
+        std::unordered_set<std::pair<const RegionID, Region>*> sub_regions;
         std::pair<const RegionID, Region>* upper_region = nullptr;
-        std::vector<StationID> stations_in_region;
+        std::unordered_set<StationID> stations_in_region;
+        //std::vector<StationID> stations_in_region;
     } region;
 
     std::unordered_map<StationID, std::shared_ptr<Station>> stations;
     std::unordered_map<RegionID, Region> regions;
     std::vector<std::pair<StationID, std::shared_ptr<Station>>> stations_to_order;
-    std::vector<RegionID> subregions(std::vector<std::pair<const RegionID, Region>*>, std::vector<RegionID>&);
+    std::vector<RegionID> subregions(std::unordered_set<std::pair<const RegionID, Region>*>, std::vector<RegionID>&);
 };
 
 #endif // DATASTRUCTURES_HH
