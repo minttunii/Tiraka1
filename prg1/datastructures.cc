@@ -108,10 +108,6 @@ std::vector<StationID> Datastructures::stations_alphabetically()
     for(auto const &elem : stations_to_order){
         stations_alph.push_back(elem.first);
     }
-
-    /*std::transform(stations_to_order.begin(), stations_to_order.end(),
-                    back_inserter(stations_alph), [] (std::pair<StationID, std::shared_ptr<Station>> const & pair){
-                    return pair.first;});*/
     return stations_alph;
 }
 
@@ -126,9 +122,9 @@ std::vector<StationID> Datastructures::stations_distance_increasing()
         return xa*xa+ya*ya < xb*xb+yb*yb;
     });
 
-    std::transform (stations_to_order.begin(), stations_to_order.end(),
-                    back_inserter(stations_dist), [] (std::pair<StationID, std::shared_ptr<Station>> const & pair){
-                    return pair.first;});
+    for(auto const &elem : stations_to_order){
+        stations_dist.push_back(elem.first);
+    }
     return stations_dist;
 }
 
@@ -321,6 +317,18 @@ std::vector<RegionID> Datastructures::station_in_regions(StationID id)
     return station_regions;
 }
 
+std::vector<RegionID> Datastructures::subregions(std::vector<std::pair<const RegionID, Region>*> sub_regions,
+                                                 std::vector<RegionID>& sub_IDs){
+    if(sub_regions.empty()){
+        return sub_IDs;
+    }
+
+    for(auto const &sub : sub_regions){
+        sub_IDs.push_back(sub->first);
+        subregions(sub->second.sub_regions, sub_IDs);
+    }
+    return sub_IDs;
+}
 
 std::vector<RegionID> Datastructures::all_subregions_of_region(RegionID id)
 {
@@ -334,30 +342,64 @@ std::vector<RegionID> Datastructures::all_subregions_of_region(RegionID id)
         return {};
     }
 
-    std::vector<RegionID> subregions;
-    for(auto const &sub : it->second.sub_regions){
-        subregions.push_back(sub->first);
+    auto sub_region = it->second.sub_regions;
+    std::vector<RegionID> sub_IDs;
+    return subregions(sub_region, sub_IDs);
+}
+
+std::vector<StationID> Datastructures::stations_closest_to(Coord xy)
+{
+    std::multimap<int, StationID> distances;
+    std::vector<StationID> closest;
+
+    for(auto const &elem: stations){
+        int x2 = elem.second->coord.x;
+        int y2 = elem.second->coord.y;
+        distances.insert({(xy.x-x2)*(xy.x-x2)+(xy.y-y2)*(xy.y-y2), elem.first});
     }
-    return subregions;
+
+    int k = 3;
+    for(auto it = distances.begin(); it != distances.end() && k > 0 ; it++, k-- ){
+        closest.push_back(it->second);
+    }
+    return closest;
 }
 
-std::vector<StationID> Datastructures::stations_closest_to(Coord /*xy*/)
+bool Datastructures::remove_station(StationID id)
 {
-    // Replace the line below with your implementation
-    // Also uncomment parameters ( /* param */ -> param )
-    throw NotImplemented("stations_closest_to()");
+    auto it = stations.find(id);
+    if(it == stations.end()){
+        return false;
+    }
+    if(it->second->upper_id != 0){
+        auto it2 = regions.find(it->second->upper_id);
+        auto stations_in_region = it2->second.stations_in_region;
+        for(auto i = stations_in_region.begin(); i != stations_in_region.end(); i++){
+            if(*i == id){
+                stations_in_region.erase(i);
+                it2->second.stations_in_region = stations_in_region;
+                break;
+            }
+        }
+    }
+    for(auto i = stations_to_order.begin(); i != stations_to_order.end(); i++){
+        if(i->first == id){
+            stations_to_order.erase(i);
+            break;
+        }
+    }
+    stations.erase(it);
+    return true;
 }
 
-bool Datastructures::remove_station(StationID /*id*/)
+RegionID Datastructures::common_parent_of_regions(RegionID id1, RegionID id2)
 {
-    // Replace the line below with your implementation
-    // Also uncomment parameters ( /* param */ -> param )
-    throw NotImplemented("remove_station()");
-}
+    auto it = regions.find(id1);
+    auto it2 = regions.find(id2);
+    // Jos alueita ei löydy
+    if(it == regions.end() || it2 == regions.end()){
+        return NO_REGION;
+    }
 
-RegionID Datastructures::common_parent_of_regions(RegionID /*id1*/, RegionID /*id2*/)
-{
-    // Replace the line below with your implementation
-    // Also uncomment parameters ( /* param */ -> param )
-    throw NotImplemented("common_parent_of_regions()");
+    return NO_REGION;
 }

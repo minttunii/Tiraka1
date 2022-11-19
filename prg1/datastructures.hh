@@ -195,16 +195,18 @@ public:
 
     // Non-compulsory operations
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(n*log(n))
+    // Short rationale for estimate: Subregions are found recursively. For loop in the function
+    // is linear and it is called as far when there are subregions.
     std::vector<RegionID> all_subregions_of_region(RegionID id);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(n*log(n))
+    // Short rationale for estimate: Creating multimap is nlogn and finding three or less closest
+    // is constant.
     std::vector<StationID> stations_closest_to(Coord xy);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(n)
+    // Short rationale for estimate: For loop for finding station in regions and vector is linear
     bool remove_station(StationID id);
 
     // Estimate of performance:
@@ -227,10 +229,10 @@ private:
         std::vector<StationID> stations_in_region;
     } region;
 
-    //std::unordered_map<StationID, Station> stations;
     std::unordered_map<StationID, std::shared_ptr<Station>> stations;
     std::unordered_map<RegionID, Region> regions;
     std::vector<std::pair<StationID, std::shared_ptr<Station>>> stations_to_order;
+    std::vector<RegionID> subregions(std::vector<std::pair<const RegionID, Region>*>, std::vector<RegionID>&);
 };
 
 #endif // DATASTRUCTURES_HH
