@@ -210,8 +210,9 @@ public:
     // Short rationale for estimate: For loop for finding station in regions and vector is linear
     bool remove_station(StationID id);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(n)
+    // Short rationale for estimate: Find is constant on average and linear in worst case.
+    // Problem is solved recursively.
     RegionID common_parent_of_regions(RegionID id1, RegionID id2);
 
 private:
@@ -225,17 +226,17 @@ private:
     struct Region {
         Name name;
         std::vector<Coord> coords;
-        //std::vector<std::pair<const RegionID, Region>*> sub_regions;
         std::unordered_set<std::pair<const RegionID, Region>*> sub_regions;
         std::pair<const RegionID, Region>* upper_region = nullptr;
         std::unordered_set<StationID> stations_in_region;
-        //std::vector<StationID> stations_in_region;
     } region;
 
     std::unordered_map<StationID, std::shared_ptr<Station>> stations;
     std::unordered_map<RegionID, Region> regions;
     std::vector<std::pair<StationID, std::shared_ptr<Station>>> stations_to_order;
     std::vector<RegionID> subregions(std::unordered_set<std::pair<const RegionID, Region>*>, std::vector<RegionID>&);
+    RegionID common_parent(std::pair<const RegionID, Region>*, std::pair<const RegionID, Region>*, std::pair<const RegionID,
+                           Region>*, std::pair<const RegionID, Region>*);
 };
 
 #endif // DATASTRUCTURES_HH

@@ -393,6 +393,40 @@ bool Datastructures::remove_station(StationID id)
     return true;
 }
 
+RegionID Datastructures::common_parent(std::pair<const RegionID, Region>* prev1,
+                                       std::pair<const RegionID, Region>* prev2,
+                                       std::pair<const RegionID, Region>* curr1,
+                                       std::pair<const RegionID, Region>* curr2){
+    //Tapaukset, joissa yhteinen alue voidaan löytää
+    if(prev1->first == prev2->first){
+        return prev1->first;
+    }
+    else if(prev1->first == curr1->first){
+        return prev1->first;
+    }
+    else if(prev2->first == curr1->first){
+        return prev2->first;
+    }
+    else if(curr1->first == curr2->first){
+        return curr1->first;
+    }
+    else{
+        if(curr1->second.upper_region != nullptr && curr2->second.upper_region != nullptr){
+            common_parent(curr1, curr2, curr1->second.upper_region, curr2->second.upper_region);
+        }
+        else if(curr1->second.upper_region == nullptr && curr2->second.upper_region != nullptr){
+            common_parent(curr1, curr2, curr1, curr2->second.upper_region);
+        }
+        else if(curr1->second.upper_region != nullptr && curr2->second.upper_region == nullptr){
+            common_parent(curr1, curr2, curr1->second.upper_region, curr2);
+        }
+        else{
+            return NO_REGION;
+        }
+    }
+    return NO_REGION;
+}
+
 RegionID Datastructures::common_parent_of_regions(RegionID id1, RegionID id2)
 {
     auto it = regions.find(id1);
@@ -401,6 +435,11 @@ RegionID Datastructures::common_parent_of_regions(RegionID id1, RegionID id2)
     if(it == regions.end() || it2 == regions.end()){
         return NO_REGION;
     }
+    auto parent1 = it->second.upper_region;
+    auto parent2 = it2->second.upper_region;{}
 
-    return NO_REGION;
+    if(parent1->first == parent2->first){
+        return parent1->first;
+    }
+    return common_parent(parent1, parent2, parent1->second.upper_region, parent2->second.upper_region);
 }
