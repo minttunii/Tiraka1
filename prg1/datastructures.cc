@@ -58,6 +58,7 @@ void Datastructures::clear_all()
     stations.clear();
     regions.clear();
     stations_to_order.clear();
+    station_coords.clear();
 }
 
 /*!
@@ -90,7 +91,8 @@ bool Datastructures::add_station(StationID id, const Name& name, Coord xy)
     station.name = name; station.coord = xy;
     std::shared_ptr<Station> station_ptr = std::make_shared<Station>(station);
     stations.insert({id, station_ptr});
-    stations_to_order.push_back({id, station_ptr});
+    //stations_to_order.push_back({id, station_ptr});
+    station_coords.insert({xy, id});
     return true;
 }
 
@@ -133,8 +135,17 @@ std::vector<StationID> Datastructures::stations_alphabetically()
 {
     std::vector<StationID> stations_alph;
     stations_alph.reserve(stations.size());
+    std::map<Name, StationID> station_names;
 
-    sort(stations_to_order.begin(), stations_to_order.end(),
+    for(auto const &elem : stations){
+        station_names.insert({elem.second->name, elem.first});
+    }
+
+    for(auto const &elem : station_names){
+        stations_alph.push_back(elem.second);
+    }
+
+    /*sort(stations_to_order.begin(), stations_to_order.end(),
          [](const std::pair<StationID, std::shared_ptr<Station>> &a,
          const std::pair<StationID, std::shared_ptr<Station>> &b)-> bool{
 
@@ -142,7 +153,7 @@ std::vector<StationID> Datastructures::stations_alphabetically()
 
     for(auto const &elem : stations_to_order){
         stations_alph.push_back(elem.first);
-    }
+    }*/
     return stations_alph;
 }
 
@@ -153,10 +164,10 @@ std::vector<StationID> Datastructures::stations_alphabetically()
  */
 std::vector<StationID> Datastructures::stations_distance_increasing()
 {
-    std::vector<StationID> stations_dist;
-    stations_dist.reserve(stations.size());
+    std::vector<StationID> dist_vector;
+    dist_vector.reserve(stations.size());
 
-    sort(stations_to_order.begin(), stations_to_order.end(),
+    /*sort(stations_to_order.begin(), stations_to_order.end(),
          [](const std::pair<StationID, std::shared_ptr<Station>> &a,
          const std::pair<StationID, std::shared_ptr<Station>> &b) -> bool{
         int xa = a.second->coord.x; int ya = a.second->coord.y;
@@ -168,8 +179,12 @@ std::vector<StationID> Datastructures::stations_distance_increasing()
 
     for(auto const &elem : stations_to_order){
         stations_dist.push_back(elem.first);
+    }*/
+
+    for(auto const &elem : station_coords){
+        dist_vector.push_back(elem.second);
     }
-    return stations_dist;
+    return dist_vector;
 }
 
 /*!
@@ -179,12 +194,19 @@ std::vector<StationID> Datastructures::stations_distance_increasing()
  */
 StationID Datastructures::find_station_with_coord(Coord xy)
 {
-    for(auto const& elem : stations){
+    auto it = station_coords.find(xy);
+    if(it == station_coords.end()){
+        return NO_STATION;
+    }
+
+    return it->second;
+
+    /*for(auto const& elem : stations){
         if(elem.second->coord == xy){
             return elem.first;
         }
     }
-    return NO_STATION;
+    return NO_STATION;*/
 }
 
 /*!
@@ -199,7 +221,11 @@ bool Datastructures::change_station_coord(StationID id, Coord newcoord)
     if(it == stations.end()){
         return false;
     }
+    auto it2 = station_coords.find(it->second->coord);
     it->second->coord = newcoord;
+    station_coords.erase(it2);
+    station_coords.insert({newcoord, id});
+
     return true;
 }
 
@@ -465,7 +491,7 @@ std::vector<RegionID> Datastructures::all_subregions_of_region(RegionID id)
     if(it == regions.end()){
         return {NO_REGION};
     }
-    // if area doesn't have sub regions
+    // If area doesn't have sub regions
     else if(it->second.sub_regions.empty()){
         return {};
     }
@@ -495,6 +521,7 @@ std::vector<StationID> Datastructures::stations_closest_to(Coord xy)
     for(auto it = distances.begin(); it != distances.end() && k > 0 ; it++, k-- ){
         closest.push_back(it->second);
     }
+
     return closest;
 }
 
@@ -520,13 +547,18 @@ bool Datastructures::remove_station(StationID id)
             it2->second.stations_in_region = stations_in_region;
         }
     }
+
+    // Station has to be deleted from station_coords
+    auto iter = station_coords.find(it->second->coord);
+    station_coords.erase(iter);
+
     //Station has to be deleted from stations_to_order vector
-    for(auto i = stations_to_order.begin(); i != stations_to_order.end(); i++){
+    /*for(auto i = stations_to_order.begin(); i != stations_to_order.end(); i++){
         if(i->first == id){
             stations_to_order.erase(i);
             break;
         }
-    }
+    }*/
     stations.erase(it);
     return true;
 }

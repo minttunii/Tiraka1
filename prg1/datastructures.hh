@@ -64,9 +64,14 @@ struct CoordHash
 // as key for std::map/set
 inline bool operator<(Coord c1, Coord c2)
 {
-    if (c1.y < c2.y) { return true; }
-    else if (c2.y < c1.y) { return false; }
-    else { return c1.x < c2.x; }
+    if(c1.x*c1.x + c1.y*c1.y == c2.x*c2.x + c2.y*c2.y){
+         if(c1.y < c2.y){ return true;}
+         else{ return false;}
+    }
+    else{
+        if(c1.x*c1.x + c1.y*c1.y < c2.x*c2.x + c2.y*c2.y){ return true;}
+        else{ return false;}
+    }
 }
 
 // Return value for cases where coordinates were not found
@@ -112,40 +117,46 @@ public:
     void clear_all();
 
     // Estimate of performance: O(n)
-    // Short rationale for estimate: Iterating map is linear in worst case and vector pushback is constant
+    // Short rationale for estimate: Iterating map is linear in worst case and
+    // vector pushback is constant
     std::vector<StationID> all_stations();
 
     // Estimate of performance: O(n)
-    // Short rationale for estimate: Count function and inserting to map is constant on average but linear in worst case.
-    // Pushback to vector is constant unless it needs relocating
+    // Short rationale for estimate: Find function and inserting to unsorted map
+    // is constant on average but linear in worst case.
+    // Inserting to map is logarithmic.
     bool add_station(StationID id, Name const& name, Coord xy);
 
     // Estimate of performance: O(n)
-    // Short rationale for estimate: Find function is constant on average and in worst case linear in container size
+    // Short rationale for estimate: Find function is constant on average and in
+    // worst case linear in container size
     Name get_station_name(StationID id);
 
     // Estimate of performance: O(n)
-    // Short rationale for estimate: Find function is constant on average and in worst case linear in container size
+    // Short rationale for estimate: Find function is constant on average and in
+    // worst case linear in container size
     Coord get_station_coordinates(StationID id);
 
     // We recommend you implement the operations below only after implementing the ones above
 
     // Estimate of performance: O(n*log(n))
-    // Short rationale for estimate: Sort function is nlog(n) and creating vector is linear in general case
+    // Short rationale for estimate: For loop for creating map is nlog(n) and
+    // creating vector is linear
     // Reserve is linear at most if reallocating happens
     std::vector<StationID> stations_alphabetically();
 
-    // Estimate of performance: O(n*log(n))
-    // Short rationale for estimate: Sort function is nlog(n) and creating vector is linear in general case
+    // Estimate of performance: O(n)
+    // Short rationale for estimate: Creating vector is linear in general case
     // Reserve is linear at most if reallocating happens
     std::vector<StationID> stations_distance_increasing();
 
     // Estimate of performance: O(n)
-    // Short rationale for estimate: Iterating map is linear in worst case
+    // Short rationale for estimate: Find is linear in worst case
     StationID find_station_with_coord(Coord xy);
 
     // Estimate of performance: O(n)
     // Short rationale for estimate: Find is linear in worst case but average on constant
+    // Erase is constant and insert is logarithmic
     bool change_station_coord(StationID id, Coord newcoord);
 
     // Estimate of performance: O(log(n))
@@ -207,7 +218,7 @@ public:
     std::vector<StationID> stations_closest_to(Coord xy);
 
     // Estimate of performance: O(n)
-    // Short rationale for estimate: For loop for finding station in regions and vector is linear
+    // Short rationale for estimate: Find is linear in worst case but constant on average
     bool remove_station(StationID id);
 
     // Estimate of performance: O(n)
@@ -234,9 +245,16 @@ private:
     std::unordered_map<StationID, std::shared_ptr<Station>> stations;
     std::unordered_map<RegionID, Region> regions;
     std::vector<std::pair<StationID, std::shared_ptr<Station>>> stations_to_order;
-    std::vector<RegionID> subregions(std::unordered_set<std::pair<const RegionID, Region>*>, std::vector<RegionID>&);
-    RegionID common_parent(std::pair<const RegionID, Region>*, std::pair<const RegionID, Region>*, std::pair<const RegionID,
-                           Region>*, std::pair<const RegionID, Region>*);
+
+    std::map<Coord, StationID> station_coords;
+    //std::map<Name, StationID> station_names;
+
+    std::vector<RegionID> subregions(std::unordered_set<std::pair<const RegionID, Region>*>,
+                                     std::vector<RegionID>&);
+    RegionID common_parent(std::pair<const RegionID, Region>*,
+                           std::pair<const RegionID, Region>*,
+                           std::pair<const RegionID, Region>*,
+                           std::pair<const RegionID, Region>*);
 };
 
 #endif // DATASTRUCTURES_HH
