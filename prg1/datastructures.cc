@@ -376,11 +376,18 @@ bool Datastructures::add_subregion_to_region(RegionID id, RegionID parentid)
     return true;
 }
 
+/*!
+ * \brief Datastructures::add_station_to_region adds station to region
+ * \param id station id
+ * \param parentid region id
+ * \return false if station doesn't exist or station already belongs to a region,
+ * true is station is added to the region
+ */
 bool Datastructures::add_station_to_region(StationID id, RegionID parentid)
 {
     auto it = stations.find(id);
     auto it2 = regions.find(parentid);
-    // If station or region doesn't exist or station already belongs to region
+    // If station or region doesn't exist or station already belongs to a region
     if(it == stations.end() || it2 == regions.end() || it->second->upper_id != 0){
         return false;
     }
@@ -389,6 +396,13 @@ bool Datastructures::add_station_to_region(StationID id, RegionID parentid)
     return true;
 }
 
+/*!
+ * \brief Datastructures::station_in_regions adds all reagion ids that the station
+ * belongs to directly or indirectly
+ * \param id station id
+ * \return vector with region ids where the station belongs to, NO_REGION if station
+ * doesn't exist and empty vector if station doesn't belong to any region
+ */
 std::vector<RegionID> Datastructures::station_in_regions(StationID id)
 {
     auto it = stations.find(id);
