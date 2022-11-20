@@ -401,23 +401,26 @@ RegionID Datastructures::common_parent(std::pair<const RegionID, Region>* prev1,
     if(prev1->first == prev2->first){
         return prev1->first;
     }
-    else if(prev1->first == curr1->first){
+    else if(curr1 != nullptr && prev1->first == curr1->first){
         return prev1->first;
     }
-    else if(prev2->first == curr1->first){
+    else if(curr1 != nullptr  && prev2->first == curr1->first){
         return prev2->first;
     }
-    else if(curr1->first == curr2->first){
+    else if(curr2 != nullptr  && prev1->first == curr2->first){
+        return prev2->first;
+    }
+    else if(curr1 != nullptr && curr2 != nullptr && curr1->first == curr2->first){
         return curr1->first;
     }
     else{
-        if(curr1->second.upper_region != nullptr && curr2->second.upper_region != nullptr){
+        if(curr1 != nullptr && curr2 != nullptr && curr1->second.upper_region != nullptr && curr2->second.upper_region != nullptr){
             common_parent(curr1, curr2, curr1->second.upper_region, curr2->second.upper_region);
         }
-        else if(curr1->second.upper_region == nullptr && curr2->second.upper_region != nullptr){
+        else if(curr1 != nullptr && curr2 != nullptr && curr1->second.upper_region == nullptr && curr2->second.upper_region != nullptr){
             common_parent(curr1, curr2, curr1, curr2->second.upper_region);
         }
-        else if(curr1->second.upper_region != nullptr && curr2->second.upper_region == nullptr){
+        else if(curr1 != nullptr && curr2 != nullptr && curr1->second.upper_region != nullptr && curr2->second.upper_region == nullptr){
             common_parent(curr1, curr2, curr1->second.upper_region, curr2);
         }
         else{
@@ -436,10 +439,11 @@ RegionID Datastructures::common_parent_of_regions(RegionID id1, RegionID id2)
         return NO_REGION;
     }
     auto parent1 = it->second.upper_region;
-    auto parent2 = it2->second.upper_region;{}
+    auto parent2 = it2->second.upper_region;
 
-    if(parent1->first == parent2->first){
-        return parent1->first;
+    // Jos ylempiä alueita ei ole löydy
+    if(parent1 == nullptr || parent2 == nullptr){
+        return NO_REGION;
     }
     return common_parent(parent1, parent2, parent1->second.upper_region, parent2->second.upper_region);
 }
