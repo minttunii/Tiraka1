@@ -408,7 +408,7 @@ RegionID Datastructures::common_parent(std::pair<const RegionID, Region>* prev1,
         return prev2->first;
     }
     else if(curr2 != nullptr  && prev1->first == curr2->first){
-        return prev2->first;
+        return prev1->first;
     }
     else if(curr1 != nullptr && curr2 != nullptr && curr1->first == curr2->first){
         return curr1->first;
