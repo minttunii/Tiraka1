@@ -57,7 +57,7 @@ void Datastructures::clear_all()
 {
     stations.clear();
     regions.clear();
-    stations_to_order.clear();
+    station_names.clear();
     station_coords.clear();
 }
 
@@ -137,9 +137,9 @@ std::vector<StationID> Datastructures::stations_alphabetically()
     std::vector<StationID> stations_alph;
     stations_alph.reserve(stations.size());
 
-    for(auto const &elem : station_names){
-        stations_alph.push_back(elem.second);
-    }
+    std::for_each(station_names.begin(),station_names.end(),
+                         [&stations_alph](const std::pair<Name, StationID> &s)
+                         { stations_alph.push_back(s.second); });
     return stations_alph;
 }
 
@@ -473,21 +473,52 @@ std::vector<RegionID> Datastructures::all_subregions_of_region(RegionID id)
  */
 std::vector<StationID> Datastructures::stations_closest_to(Coord xy)
 {
-    std::multimap<int, StationID> distances;
-    std::vector<StationID> closest;
+    std::vector<StationID> closest_to;
+    std::multimap<int, StationID> sorted_distances;
 
-    for(auto const &elem: stations){
-        int x2 = elem.second->coord.x;
-        int y2 = elem.second->coord.y;
-        distances.insert({(xy.x-x2)*(xy.x-x2)+(xy.y-y2)*(xy.y-y2), elem.first});
+    // Find the closest element of given point
+    auto it = std::min_element(station_coords.begin(), station_coords.end(),
+                               [&xy](const auto &c1, const auto &c2){
+       if((xy.x-c1.first.x)*(xy.x-c1.first.x)+(xy.y-c1.first.y)*(xy.y-c1.first.y)
+               == (xy.x-c2.first.x)*(xy.x-c2.first.x)+(xy.y-c2.first.y)*(xy.y-c2.first.y)) {
+           return c1.first.y < c2.first.y;
+       }
+       else{
+           return (xy.x-c1.first.x)*(xy.x-c1.first.x)+(xy.y-c1.first.y)*(xy.y-c1.first.y)
+                   < (xy.x-c2.first.x)*(xy.x-c2.first.x)+(xy.y-c2.first.y)*(xy.y-c2.first.y);
+       }
+    });
+
+    // The next closest should be found near the minimum since station_coords is sorted by coordinates
+    if(it != station_coords.end()){
+        int k = 3;
+        // Add min element's and next two element's distance from xy to map
+        for(auto i = it; i != station_coords.end() && k > 0 ; i++, k-- ){
+            int x2 = i->first.x;
+            int y2 = i->first.y;
+            sorted_distances.insert({(xy.x-x2)*(xy.x-x2)+(xy.y-y2)*(xy.y-y2), i->second});
+        }
+        k = 2;
+        // Add two previous coordinates' of min element distance from xy to map
+        if(it != station_coords.begin()){
+            auto j = std::prev(it, 1);
+            for(; k > 0 ; k-- ){
+                int x2 = j->first.x;
+                int y2 = j->first.y;
+                sorted_distances.insert({(xy.x-x2)*(xy.x-x2)+(xy.y-y2)*(xy.y-y2), j->second});
+                if(j != station_coords.begin()){
+                    j = std::prev(j,1);
+                }
+                else{ break; }
+            }
+        }
+        //Add three closest points' ids to the vector
+        k = 3;
+        for(auto iter = sorted_distances.begin(); iter != sorted_distances.end() && k > 0 ; iter++, k-- ){
+            closest_to.push_back(iter->second);
+        }
     }
-
-    int k = 3;
-    for(auto it = distances.begin(); it != distances.end() && k > 0 ; it++, k-- ){
-        closest.push_back(it->second);
-    }
-
-    return closest;
+    return closest_to;
 }
 
 /*!

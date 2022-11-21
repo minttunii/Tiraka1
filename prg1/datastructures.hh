@@ -113,12 +113,12 @@ public:
     unsigned int station_count();
 
     // Estimate of performance: O(n)
-    // Short rationale for estimate: clear function is linear on size
+    // Short rationale for estimate: Clear function is linear on size
     void clear_all();
 
     // Estimate of performance: O(n)
-    // Short rationale for estimate: Iterating map is linear in worst case and
-    // vector pushback is constant
+    // Short rationale for estimate: Iterating map is linear in worst case,
+    // vector pushback is constant and reserve is linear in worst case
     std::vector<StationID> all_stations();
 
     // Estimate of performance: O(n)
@@ -139,9 +139,8 @@ public:
 
     // We recommend you implement the operations below only after implementing the ones above
 
-    // Estimate of performance: O(n*log(n))
-    // Short rationale for estimate: For loop for creating map is nlog(n) and
-    // creating vector is linear
+    // Estimate of performance: O(n)
+    // Short rationale for estimate: For loop for creating vector is linear
     // Reserve is linear at most if reallocating happens
     std::vector<StationID> stations_alphabetically();
 
@@ -180,7 +179,8 @@ public:
     bool add_region(RegionID id, Name const& name, std::vector<Coord> coords);
 
     // Estimate of performance: O(n)
-    // Short rationale for estimate: For loop is linear and vector pushback and empty function is constant
+    // Short rationale for estimate: For loop is linear and vector pushback and
+    // empty function is constant. Reserve is linear in worst case.
     std::vector<RegionID> all_regions();
 
     // Estimate of performance: O(n)
@@ -213,12 +213,15 @@ public:
     std::vector<RegionID> all_subregions_of_region(RegionID id);
 
     // Estimate of performance: O(n*log(n))
-    // Short rationale for estimate: Creating multimap is nlogn and finding three or less closest
-    // is constant.
+    // Short rationale for estimate: Finding min element and prev is linear.
+    // Inserting to multimap is locarithmic but it is done at most five times.
+    // Vector pushback is constant on average.
     std::vector<StationID> stations_closest_to(Coord xy);
 
     // Estimate of performance: O(n)
     // Short rationale for estimate: Find is linear in worst case but constant on average
+    // for unsorted map but logartihmic for map. Erase is constant on average but linear
+    // in worst case
     bool remove_station(StationID id);
 
     // Estimate of performance: O(n)
@@ -244,11 +247,8 @@ private:
 
     std::unordered_map<StationID, std::shared_ptr<Station>> stations;
     std::unordered_map<RegionID, Region> regions;
-    std::vector<std::pair<StationID, std::shared_ptr<Station>>> stations_to_order;
-
     std::map<Coord, StationID> station_coords;
-    //std::map<Name, StationID> station_names;
-
+    std::map<Name, StationID> station_names;
     std::vector<RegionID> subregions(std::unordered_set<std::pair<const RegionID, Region>*>,
                                      std::vector<RegionID>&);
     RegionID common_parent(std::pair<const RegionID, Region>*,
