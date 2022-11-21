@@ -68,10 +68,11 @@ void Datastructures::clear_all()
 std::vector<StationID> Datastructures::all_stations()
 {
     std::vector<StationID> all_stations;
+    all_stations.reserve(stations.size());
 
-    for(auto const& elem : stations){
-        all_stations.push_back(elem.first);
-    }
+    std::for_each(stations.begin(),stations.end(),
+                     [&all_stations](const std::pair<StationID,std::shared_ptr<Station>> &s)
+                     { all_stations.push_back(s.first); });
     return all_stations;
 }
 
@@ -91,8 +92,8 @@ bool Datastructures::add_station(StationID id, const Name& name, Coord xy)
     station.name = name; station.coord = xy;
     std::shared_ptr<Station> station_ptr = std::make_shared<Station>(station);
     stations.insert({id, station_ptr});
-    //stations_to_order.push_back({id, station_ptr});
     station_coords.insert({xy, id});
+    station_names.insert({name, id});
     return true;
 }
 
@@ -135,25 +136,10 @@ std::vector<StationID> Datastructures::stations_alphabetically()
 {
     std::vector<StationID> stations_alph;
     stations_alph.reserve(stations.size());
-    std::map<Name, StationID> station_names;
-
-    for(auto const &elem : stations){
-        station_names.insert({elem.second->name, elem.first});
-    }
 
     for(auto const &elem : station_names){
         stations_alph.push_back(elem.second);
     }
-
-    /*sort(stations_to_order.begin(), stations_to_order.end(),
-         [](const std::pair<StationID, std::shared_ptr<Station>> &a,
-         const std::pair<StationID, std::shared_ptr<Station>> &b)-> bool{
-
-            return a.second->name < b.second->name; });
-
-    for(auto const &elem : stations_to_order){
-        stations_alph.push_back(elem.first);
-    }*/
     return stations_alph;
 }
 
@@ -166,20 +152,6 @@ std::vector<StationID> Datastructures::stations_distance_increasing()
 {
     std::vector<StationID> dist_vector;
     dist_vector.reserve(stations.size());
-
-    /*sort(stations_to_order.begin(), stations_to_order.end(),
-         [](const std::pair<StationID, std::shared_ptr<Station>> &a,
-         const std::pair<StationID, std::shared_ptr<Station>> &b) -> bool{
-        int xa = a.second->coord.x; int ya = a.second->coord.y;
-        int xb = b.second->coord.x; int yb = b.second->coord.y;
-
-        if(xa*xa+ya*ya == xb*xb+yb*yb){ return ya < yb;}
-        return xa*xa+ya*ya < xb*xb+yb*yb;
-    });
-
-    for(auto const &elem : stations_to_order){
-        stations_dist.push_back(elem.first);
-    }*/
 
     for(auto const &elem : station_coords){
         dist_vector.push_back(elem.second);
@@ -198,15 +170,7 @@ StationID Datastructures::find_station_with_coord(Coord xy)
     if(it == station_coords.end()){
         return NO_STATION;
     }
-
     return it->second;
-
-    /*for(auto const& elem : stations){
-        if(elem.second->coord == xy){
-            return elem.first;
-        }
-    }
-    return NO_STATION;*/
 }
 
 /*!
@@ -339,14 +303,15 @@ bool Datastructures::add_region(RegionID id, const Name &name, std::vector<Coord
 std::vector<RegionID> Datastructures::all_regions()
 {
     std::vector<RegionID> all_regions;
+    all_regions.reserve(regions.size());
     // If there are no regions
     if(regions.empty()){
         return all_regions;
     }
 
-    for(auto &elem : regions){
-        all_regions.push_back(elem.first);
-    }
+    std::for_each(regions.begin(), regions.end(),
+                     [&all_regions](const std::pair<RegionID, Region> &r)
+                     { all_regions.push_back(r.first); });
     return all_regions;
 }
 
@@ -548,17 +513,11 @@ bool Datastructures::remove_station(StationID id)
         }
     }
 
-    // Station has to be deleted from station_coords
+    // Station has to be deleted from station_coords and station_names maps
     auto iter = station_coords.find(it->second->coord);
+    auto iter2 = station_names.find(it->second->name);
     station_coords.erase(iter);
-
-    //Station has to be deleted from stations_to_order vector
-    /*for(auto i = stations_to_order.begin(); i != stations_to_order.end(); i++){
-        if(i->first == id){
-            stations_to_order.erase(i);
-            break;
-        }
-    }*/
+    station_names.erase(iter2);
     stations.erase(it);
     return true;
 }
