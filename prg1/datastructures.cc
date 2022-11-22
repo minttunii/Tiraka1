@@ -149,13 +149,14 @@ std::vector<StationID> Datastructures::stations_alphabetically()
  */
 std::vector<StationID> Datastructures::stations_distance_increasing()
 {
-    std::vector<StationID> dist_vector;
-    dist_vector.reserve(stations.size());
+    std::vector<StationID> station_dist;
+    station_dist.reserve(stations.size());
 
-    for(auto &elem : station_coords){
-        dist_vector.push_back(elem.second);
-    }
-    return dist_vector;
+    std::for_each(station_coords.begin(),station_coords.end(),
+                         [&station_dist](const std::pair<Coord, StationID> &s)
+                         { station_dist.push_back(s.second);});
+
+    return station_dist;
 }
 
 /*!
@@ -181,6 +182,7 @@ StationID Datastructures::find_station_with_coord(Coord xy)
 bool Datastructures::change_station_coord(StationID id, Coord newcoord)
 {
     auto it = stations.find(id);
+    // If station is not found
     if(it == stations.end()){
         return false;
     }
@@ -474,16 +476,18 @@ std::vector<StationID> Datastructures::stations_closest_to(Coord xy)
     std::vector<StationID> closest_to;
     std::multimap<int, StationID> sorted_distances;
 
-    // Find the closest element of given point
+    // Find the closest element of given point xy
     auto it = std::min_element(station_coords.begin(), station_coords.end(),
                                [&xy](const auto &c1, const auto &c2){
-       if((xy.x-c1.first.x)*(xy.x-c1.first.x)+(xy.y-c1.first.y)*(xy.y-c1.first.y)
-               == (xy.x-c2.first.x)*(xy.x-c2.first.x)+(xy.y-c2.first.y)*(xy.y-c2.first.y)) {
-           return c1.first.y < c2.first.y;
+        int x = xy.x; int y = xy.y;
+        int x1 = c1.first.x; int y1 = c1.first.y;
+        int x2 = c2.first.x; int y2 = c2.first.y;
+
+       if((x-x1)*(x-x1)+(y-y1)*(y-y1) == (x-x2)*(x-x2)+(y-y2)*(y-y2)) {
+           return y1 < y2;
        }
        else{
-           return (xy.x-c1.first.x)*(xy.x-c1.first.x)+(xy.y-c1.first.y)*(xy.y-c1.first.y)
-                   < (xy.x-c2.first.x)*(xy.x-c2.first.x)+(xy.y-c2.first.y)*(xy.y-c2.first.y);
+           return (x-x1)*(x-x1)+(y-y1)*(y-y1) < (x-x2)*(x-x2)+(y-y2)*(y-y2);
        }
     });
 

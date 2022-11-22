@@ -140,13 +140,13 @@ public:
     // We recommend you implement the operations below only after implementing the ones above
 
     // Estimate of performance: O(n)
-    // Short rationale for estimate: For loop for creating vector is linear
-    // Reserve is linear at most if reallocating happens
+    // Short rationale for estimate: For loop for creating vector is linear.
+    // Reserve is linear at most if reallocating happens.
     std::vector<StationID> stations_alphabetically();
 
     // Estimate of performance: O(n)
-    // Short rationale for estimate: Creating vector is linear in general case
-    // Reserve is linear at most if reallocating happens
+    // Short rationale for estimate: Creating vector is linear.
+    // Reserve is linear at most if reallocating happens.
     std::vector<StationID> stations_distance_increasing();
 
     // Estimate of performance: O(n)
@@ -154,17 +154,18 @@ public:
     StationID find_station_with_coord(Coord xy);
 
     // Estimate of performance: O(n)
-    // Short rationale for estimate: Find is linear in worst case but average on constant
-    // Erase is constant and insert is logarithmic
+    // Short rationale for estimate: Find is linear in worst case but average on constant.
+    // Erase is constant and insert to map is logarithmic.
     bool change_station_coord(StationID id, Coord newcoord);
 
-    // Estimate of performance: O(log(n))
-    // Short rationale for estimate: For loop is linear in worst case but on average is constant since the loop breaks.
+    // Estimate of performance: O(n))
+    // Short rationale for estimate: For loop is linear in worst case.
     // Insert and find are logarithmic.
     bool add_departure(StationID stationid, TrainID trainid, Time time);
 
     // Estimate of performance: O(n)
-    // Short rationale for estimate: Find is logaritmhmic and for loop is linear in worst case. Erase is constant.
+    // Short rationale for estimate: Find is logaritmhmic and for loop is linear
+    // in worst case. Erase is constant.
     bool remove_departure(StationID stationid, TrainID trainid, Time time);
 
     // Estimate of performance: O(n)
@@ -175,7 +176,7 @@ public:
 
     // Estimate of performance: O(n)
     // Short rationale for estimate: Find function and insert are linear in worst case but
-    // insert is constant on average
+    // insert is constant on average.
     bool add_region(RegionID id, Name const& name, std::vector<Coord> coords);
 
     // Estimate of performance: O(n)
@@ -212,7 +213,7 @@ public:
     // is linear and it is called as far when there are subregions.
     std::vector<RegionID> all_subregions_of_region(RegionID id);
 
-    // Estimate of performance: O(n*log(n))
+    // Estimate of performance: O(n)
     // Short rationale for estimate: Finding min element and prev is linear.
     // Inserting to multimap is locarithmic but it is done at most five times.
     // Vector pushback is constant on average.
