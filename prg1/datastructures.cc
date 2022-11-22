@@ -152,7 +152,7 @@ std::vector<StationID> Datastructures::stations_distance_increasing()
     std::vector<StationID> dist_vector;
     dist_vector.reserve(stations.size());
 
-    for(auto const &elem : station_coords){
+    for(auto &elem : station_coords){
         dist_vector.push_back(elem.second);
     }
     return dist_vector;
@@ -487,7 +487,8 @@ std::vector<StationID> Datastructures::stations_closest_to(Coord xy)
        }
     });
 
-    // The next closest should be found near the minimum since station_coords is sorted by coordinates
+    // The next closest should be found before or after the minimum since
+    // station_coords is sorted by coordinates
     if(it != station_coords.end()){
         int k = 3;
         // Add min element's and next two element's distance from xy to map
