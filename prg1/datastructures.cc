@@ -431,7 +431,6 @@ std::vector<RegionID> Datastructures::station_in_regions(StationID id)
 std::vector<RegionID> Datastructures::subregions(
         std::unordered_set<std::pair<const RegionID, Region>*> sub_regions,
                                                  std::vector<RegionID>& sub_IDs){
-
     if(sub_regions.empty()){
         return sub_IDs;
     }
@@ -531,7 +530,6 @@ bool Datastructures::remove_station(StationID id)
     if(it == stations.end()){
         return false;
     }
-
     //Station has to be deleted from region
     if(it->second.upper_id != 0){
         auto it2 = regions.find(it->second.upper_id);
