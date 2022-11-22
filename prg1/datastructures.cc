@@ -71,7 +71,7 @@ std::vector<StationID> Datastructures::all_stations()
     all_stations.reserve(stations.size());
 
     std::for_each(stations.begin(),stations.end(),
-                     [&all_stations](const std::pair<StationID,std::shared_ptr<Station>> &s)
+                     [&all_stations](const std::pair<StationID,Station> &s)
                      { all_stations.push_back(s.first); });
     return all_stations;
 }
@@ -90,8 +90,7 @@ bool Datastructures::add_station(StationID id, const Name& name, Coord xy)
         return false;
     }
     station.name = name; station.coord = xy;
-    std::shared_ptr<Station> station_ptr = std::make_shared<Station>(station);
-    stations.insert({id, station_ptr});
+    stations.insert({id, station});
     station_coords.insert({xy, id});
     station_names.insert({name, id});
     return true;
@@ -109,7 +108,7 @@ Name Datastructures::get_station_name(StationID id)
     if(it == stations.end()){
         return NO_NAME;
     }
-    return it->second->name;
+    return it->second.name;
 }
 
 /*!
@@ -124,7 +123,7 @@ Coord Datastructures::get_station_coordinates(StationID id)
     if(it == stations.end()){
         return NO_COORD;
     }
-    return it->second->coord;
+    return it->second.coord;
 }
 
 /*!
@@ -185,8 +184,8 @@ bool Datastructures::change_station_coord(StationID id, Coord newcoord)
     if(it == stations.end()){
         return false;
     }
-    auto it2 = station_coords.find(it->second->coord);
-    it->second->coord = newcoord;
+    auto it2 = station_coords.find(it->second.coord);
+    it->second.coord = newcoord;
     station_coords.erase(it2);
     station_coords.insert({newcoord, id});
 
@@ -206,7 +205,7 @@ bool Datastructures::add_departure(StationID stationid, TrainID trainid, Time ti
     if(it == stations.end()){
         return false;
     }
-    auto trains = it->second->trains;
+    auto trains = it->second.trains;
     auto it2 = trains.find(time);
 
     // Check if departure already exist
@@ -221,7 +220,7 @@ bool Datastructures::add_departure(StationID stationid, TrainID trainid, Time ti
         }
     }
     trains.insert({time, trainid});
-    it->second->trains = trains;
+    it->second.trains = trains;
     return true;
 }
 
@@ -239,14 +238,14 @@ bool Datastructures::remove_departure(StationID stationid, TrainID trainid, Time
         return false;
     }
 
-    auto trains = it->second->trains;
+    auto trains = it->second.trains;
     auto it2 = trains.find(time);
     // Check if departure to remove exist
     if(it2 != trains.end()){
         for(auto i = it2; i != trains.end(); i++){
             if(i->first == time && i->second == trainid){
                 trains.erase(i);
-                it->second->trains = trains;
+                it->second.trains = trains;
                 return true;
             }
         }
@@ -269,7 +268,7 @@ std::vector<std::pair<Time, TrainID>> Datastructures::station_departures_after(S
         return {{NO_TIME, NO_TRAIN}};
     }
 
-    auto trains = it->second->trains;
+    auto trains = it->second.trains;
     for(auto &elem : trains){
         if(elem.first >= time){
             departures.push_back({elem.first, elem.second});
@@ -379,11 +378,11 @@ bool Datastructures::add_station_to_region(StationID id, RegionID parentid)
     auto it = stations.find(id);
     auto it2 = regions.find(parentid);
     // If station or region doesn't exist or station already belongs to a region
-    if(it == stations.end() || it2 == regions.end() || it->second->upper_id != 0){
+    if(it == stations.end() || it2 == regions.end() || it->second.upper_id != 0){
         return false;
     }
     it2->second.stations_in_region.insert(id);
-    it->second->upper_id = parentid;
+    it->second.upper_id = parentid;
     return true;
 }
 
@@ -402,14 +401,14 @@ std::vector<RegionID> Datastructures::station_in_regions(StationID id)
         return {NO_REGION};
     }
     //If station doesn't belong to the region
-    else if(it->second->upper_id == 0){
+    else if(it->second.upper_id == 0){
         return {};
     }
 
     std::vector<RegionID> station_regions;
 
     // Search for area where the station belongs to
-    auto it2 = regions.find(it->second->upper_id);
+    auto it2 = regions.find(it->second.upper_id);
     station_regions.push_back(it2->first);
 
     // Search for parent area
@@ -534,8 +533,8 @@ bool Datastructures::remove_station(StationID id)
     }
 
     //Station has to be deleted from region
-    if(it->second->upper_id != 0){
-        auto it2 = regions.find(it->second->upper_id);
+    if(it->second.upper_id != 0){
+        auto it2 = regions.find(it->second.upper_id);
         auto stations_in_region = it2->second.stations_in_region;
         auto iter = stations_in_region.find(id);
         if(iter != stations_in_region.end()){
@@ -545,8 +544,8 @@ bool Datastructures::remove_station(StationID id)
     }
 
     // Station has to be deleted from station_coords and station_names maps
-    auto iter = station_coords.find(it->second->coord);
-    auto iter2 = station_names.find(it->second->name);
+    auto iter = station_coords.find(it->second.coord);
+    auto iter2 = station_names.find(it->second.name);
     station_coords.erase(iter);
     station_names.erase(iter2);
     stations.erase(it);

@@ -245,7 +245,7 @@ private:
         std::unordered_set<StationID> stations_in_region;
     } region;
 
-    std::unordered_map<StationID, std::shared_ptr<Station>> stations;
+    std::unordered_map<StationID, Station> stations;
     std::unordered_map<RegionID, Region> regions;
     std::map<Coord, StationID> station_coords;
     std::map<Name, StationID> station_names;
