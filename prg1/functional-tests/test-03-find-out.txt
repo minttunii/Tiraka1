@@ -1,0 +1,38 @@
+> # Test find commands
+> clear_all
+Cleared all stations
+> station_count
+Number of stations: 0
+> # Find from empty
+> find_station_with_coord (3,3)
+Failed (NO_STATION returned)!
+> # Add stations
+> add_station 123456789 "Fire" (11,12)
+Station:
+   Fire: pos=(11,12), id=123456789
+> add_station 987654321 "Shelter" (21,22)
+Station:
+   Shelter: pos=(21,22), id=987654321
+> add_station 33 "Park" (3,3)
+Station:
+   Park: pos=(3,3), id=33
+> add_station 66 "Bay" (50,0)
+Station:
+   Bay: pos=(50,0), id=66
+> station_count
+Number of stations: 4
+> # Find stations
+> find_station_with_coord (3,3)
+Station:
+   Park: pos=(3,3), id=33
+> find_station_with_coord (11,12)
+Station:
+   Fire: pos=(11,12), id=123456789
+> find_station_with_coord (50,1)
+Failed (NO_STATION returned)!
+> # Empty and try again
+> clear_all
+Cleared all stations
+> find_station_with_coord (3,3)
+Failed (NO_STATION returned)!
+> 

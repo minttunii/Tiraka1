@@ -1,0 +1,43 @@
+> # Test adding stations and getting basic info
+> # Empty state
+> clear_all
+Cleared all stations
+> station_count
+Number of stations: 0
+> all_stations
+No stations!
+> # Add stations
+> add_station Id1 "One" (11,12)
+Station:
+   One: pos=(11,12), id=Id1
+> all_stations
+Station:
+   One: pos=(11,12), id=Id1
+> add_station Id2 "Two" (21,22)
+Station:
+   Two: pos=(21,22), id=Id2
+> station_count
+Number of stations: 2
+> # Test getters
+> station_info Id1
+Station:
+   One: pos=(11,12), id=Id1
+> station_info Id2
+Station:
+   Two: pos=(21,22), id=Id2
+> # Test invalid getters
+> station_info X3
+Station:
+   !NO_NAME!: pos=(--NO_COORD--), id=X3
+> # Clear and test
+> clear_all
+Cleared all stations
+> station_count
+Number of stations: 0
+> all_stations
+No stations!
+> # Test a now removed station
+> station_info Id1
+Station:
+   !NO_NAME!: pos=(--NO_COORD--), id=Id1
+> 

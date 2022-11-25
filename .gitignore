@@ -12,5 +12,12 @@ test_*
 *.pro.user*
 build-*/
 .~lock.*
+<<<<<<< HEAD
+=======
+prg1/prg1
+prg1/docs
+prg2/prg2
+prg2/docs
+>>>>>>> b129bbd7506b6eee022a6e88fb8738eb99bed082
 a.out
 

@@ -1,0 +1,50 @@
+> # Test basic sorting operations
+> clear_all
+Cleared all stations
+> station_count
+Number of stations: 0
+> # Sorting empty
+> stations_alphabetically
+> stations_distance_increasing
+> # Add stations
+> add_station 123456789 "Fire" (11,12)
+Station:
+   Fire: pos=(11,12), id=123456789
+> add_station 987654321 "Shelter" (21,22)
+Station:
+   Shelter: pos=(21,22), id=987654321
+> add_station 33 "Park" (3,3)
+Station:
+   Park: pos=(3,3), id=33
+> add_station 66 "Bay" (50,0)
+Station:
+   Bay: pos=(50,0), id=66
+> station_count
+Number of stations: 4
+> # Test sorting
+> stations_alphabetically
+Stations:
+1. Bay: pos=(50,0), id=66
+2. Fire: pos=(11,12), id=123456789
+3. Park: pos=(3,3), id=33
+4. Shelter: pos=(21,22), id=987654321
+> stations_distance_increasing
+Stations:
+1. Park: pos=(3,3), id=33
+2. Fire: pos=(11,12), id=123456789
+3. Shelter: pos=(21,22), id=987654321
+4. Bay: pos=(50,0), id=66
+> stations_alphabetically
+Stations:
+1. Bay: pos=(50,0), id=66
+2. Fire: pos=(11,12), id=123456789
+3. Park: pos=(3,3), id=33
+4. Shelter: pos=(21,22), id=987654321
+> # Empty and test again
+> clear_all
+Cleared all stations
+> station_count
+Number of stations: 0
+> stations_alphabetically
+> stations_distance_increasing
+> 

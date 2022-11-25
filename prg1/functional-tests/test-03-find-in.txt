@@ -1,0 +1,18 @@
+# Test find commands
+clear_all
+station_count
+# Find from empty
+find_station_with_coord (3,3)
+# Add stations
+add_station 123456789 "Fire" (11,12)
+add_station 987654321 "Shelter" (21,22)
+add_station 33 "Park" (3,3)
+add_station 66 "Bay" (50,0)
+station_count
+# Find stations
+find_station_with_coord (3,3)
+find_station_with_coord (11,12)
+find_station_with_coord (50,1)
+# Empty and try again
+clear_all
+find_station_with_coord (3,3)

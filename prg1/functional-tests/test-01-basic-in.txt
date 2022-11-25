@@ -1,0 +1,21 @@
+# Test adding stations and getting basic info
+# Empty state
+clear_all
+station_count
+all_stations
+# Add stations
+add_station Id1 "One" (11,12)
+all_stations
+add_station Id2 "Two" (21,22)
+station_count
+# Test getters
+station_info Id1
+station_info Id2
+# Test invalid getters
+station_info X3
+# Clear and test
+clear_all
+station_count
+all_stations
+# Test a now removed station
+station_info Id1
