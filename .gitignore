@@ -12,6 +12,5 @@ test_*
 *.pro.user*
 build-*/
 .~lock.*
-prg1/prg1
-prg1/docs
 a.out
+
