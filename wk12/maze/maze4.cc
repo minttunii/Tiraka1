@@ -2,6 +2,7 @@
 #include <vector>
 #include <algorithm>
 #include <set>
+#include <queue>
 #include "maze.hh"
 
 using namespace std;
@@ -19,7 +20,24 @@ using namespace std;
  */
 
 bool findShortestPath(Node &startNode, Node &endNode, std::vector<std::pair<int, int>>& path) {
-    std::cout << "findShortestPath not implemented" << std::endl;
-    return false;
-    // End of student code
+
+    // Start and end are the same
+    if(startNode.coords == endNode.coords){
+        return true;
+    }
+    // Find the shortest path
+    for(auto &pair : path){
+        std::cout<< pair.first<< " "<< pair.second<<std::endl;
+    }
+
+    // No path is found
+    if(path.empty() && startNode.coords != endNode.coords){
+        return false;
+    }
+
+    //Find shortest path
+    std::priority_queue<Node> Q;
+    path.push_back(startNode.coords);
+
+    return true;
 }
