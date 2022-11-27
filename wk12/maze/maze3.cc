@@ -16,6 +16,31 @@ using namespace std;
  * @param toNode  The node to connect to
  */
 void connectNodes(Node& node1, Node& node2) {
-    std::cout << "connectNodes not implemented" << std::endl;
-    // Student code here to connect the nodes together
+    auto coord1 = node1.coords;
+    auto coord2 = node2.coords;
+
+    if(coord1.first == coord2.first){
+        if(coord1.second < coord2.second){
+            // Direction is above and below
+            node1.paths.at("above") = &node2;
+            node2.paths.at("below") = &node1;
+        }
+        else{
+            // Direction is below and above
+            node1.paths.at("below") = &node2;
+            node2.paths.at("above") = &node1;
+        }
+    }
+    else if(coord1.second == coord2.second){
+        if(coord1.first < coord2.first){
+            // Direction is right and left
+            node1.paths.at("right") = &node2;
+            node2.paths.at("left") = &node1;
+        }
+        else{
+            // Direction is left and right
+            node1.paths.at("left") = &node2;
+            node2.paths.at("right") = &node1;
+        }
+    }
 }
