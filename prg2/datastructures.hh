@@ -1,13 +1,15 @@
 // Datastructures.hh
 //
-// Student name:
-// Student email:
-// Student number:
+// Student name: Minttu Niiranen
+// Student email: minttu.niiranen@tuni.fi
+// Student number: H291834
 
 #ifndef DATASTRUCTURES_HH
 #define DATASTRUCTURES_HH
 
+#include <map>
 #include <string>
+#include <unordered_set>
 #include <vector>
 #include <tuple>
 #include <utility>
@@ -61,9 +63,14 @@ struct CoordHash
 // as key for std::map/set
 inline bool operator<(Coord c1, Coord c2)
 {
-    if (c1.y < c2.y) { return true; }
-    else if (c2.y < c1.y) { return false; }
-    else { return c1.x < c2.x; }
+    if(c1.x*c1.x + c1.y*c1.y == c2.x*c2.x + c2.y*c2.y){
+         if(c1.y < c2.y){ return true;}
+         else{ return false;}
+    }
+    else{
+        if(c1.x*c1.x + c1.y*c1.y < c2.x*c2.x + c2.y*c2.y){ return true;}
+        else{ return false;}
+    }
 }
 
 // Return value for cases where coordinates were not found
@@ -250,7 +257,31 @@ public:
 
 private:
     // Add stuff needed for your class implementation here
+    struct Station {
+        Name name;
+        Coord coord;
+        std::multimap<Time, TrainID> trains;
+        RegionID upper_id = 0;
+    } station;
 
+    struct Region {
+        Name name;
+        std::vector<Coord> coords;
+        std::unordered_set<std::pair<const RegionID, Region>*> sub_regions;
+        std::pair<const RegionID, Region>* upper_region = nullptr;
+        std::unordered_set<StationID> stations_in_region;
+    } region;
+
+    std::unordered_map<StationID, Station> stations;
+    std::unordered_map<RegionID, Region> regions;
+    std::map<Coord, StationID> station_coords;
+    std::map<Name, StationID> station_names;
+    std::vector<RegionID> subregions(std::unordered_set<std::pair<const RegionID, Region>*>,
+                                     std::vector<RegionID>&);
+    RegionID common_parent(std::pair<const RegionID, Region>*,
+                           std::pair<const RegionID, Region>*,
+                           std::pair<const RegionID, Region>*,
+                           std::pair<const RegionID, Region>*);
 };
 
 #endif // DATASTRUCTURES_HH
