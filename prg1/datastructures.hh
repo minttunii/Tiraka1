@@ -1,6 +1,11 @@
+
+// Datastructures.hh
+
+
 #ifndef DATASTRUCTURES_HH
 #define DATASTRUCTURES_HH
 
+//#include "station.hh"
 #include <string>
 #include <vector>
 #include <tuple>
@@ -8,8 +13,8 @@
 #include <limits>
 #include <functional>
 #include <exception>
-#include <set>
-#include <list>
+#include <map>
+
 
 // Types for IDs
 using StationID = std::string;
@@ -25,8 +30,10 @@ RegionID const NO_REGION = -1;
 Name const NO_NAME = "!NO_NAME!";
 Time const NO_TIME = 9999;
 
+
 // Return value for cases where integer values were not found
 int const NO_VALUE = std::numeric_limits<int>::min();
+
 
 
 // Type for a coordinate (x, y)
@@ -35,6 +42,8 @@ struct Coord
     int x = NO_VALUE;
     int y = NO_VALUE;
 };
+
+
 
 // Example: Defining == and hash function for Coord so that it can be used
 // as key for std::unordered_map/set, if needed
@@ -57,7 +66,9 @@ struct CoordHash
 // as key for std::map/set
 inline bool operator<(Coord c1, Coord c2)
 {
-    if (c1.y < c2.y) { return true; }
+    if(c1.x * c1.x + c1.y * c1.y < c2.x * c2.x + c2.y * c2.y){return true;}
+    else if(c1.x * c1.x + c1.y * c1.y > c2.x * c2.x + c2.y * c2.y){return false;}
+    else if (c1.y < c2.y) { return true; }
     else if (c2.y < c1.y) { return false; }
     else { return c1.x < c2.x; }
 }
@@ -97,270 +108,145 @@ public:
     ~Datastructures();
 
     // Estimate of performance: O(1)
-    // Short rationale for estimate: std::unordered_map::size is O(1)
+    // Short rationale for estimate: Size functio estimate is O(1).
     unsigned int station_count();
 
     // Estimate of performance: O(n)
-    // Short rationale for estimate: ::clear methods for different datatypes in clear_all are O(n)
+    // Short rationale for estimate: Time Complexity of the delete is O(n).
     void clear_all();
 
     // Estimate of performance: O(n)
-    // Short rationale for estimate: Iteration of std::list is O(n)
+    // Short rationale for estimate: For loop runs once time.
     std::vector<StationID> all_stations();
 
-    // Estimate of performance: O(n)
-    // Short rationale for estimate: std::unordered_map::insert is O(n)
-    // and std::set::insert is O(log n)
+    // Estimate of performance: O(1)
+    // Short rationale for estimate: Each time adding takes the same amount of time
     bool add_station(StationID id, Name const& name, Coord xy);
 
     // Estimate of performance: O(n)
-    // Short rationale for estimate: std::unordered_map::find is O(n)
+    // Short rationale for estimate: FIND_IF efficiency is O(n).
     Name get_station_name(StationID id);
 
     // Estimate of performance: O(n)
-    // Short rationale for estimate: std::unordered_map::find is O(n)
+    // Short rationale for estimate: FIND_IF efficiency is O(n).
     Coord get_station_coordinates(StationID id);
 
     // We recommend you implement the operations below only after implementing the ones above
 
-    // Estimate of performance: O(n log n)
-    // Short rationale for estimate: Iterating through std::set is O(n)
-    // It is also possible that the method deletes all elements, which is O(nlogn)
+    // Estimate of performance: O(n log(n))
+    // Short rationale for estimate: Sort function efficiency is O(n log(n)) and transform function efficiency is O(n). n log(n) dominates n so that's the only term that you care about.
     std::vector<StationID> stations_alphabetically();
 
-    // Estimate of performance: O(n log n)
-    // Short rationale for estimate: Iterating through std::set is O(n).
-    // It is also possible that the method deletes all elements, which is O(nlogn)
+    // Estimate of performance: O(n)
+    // Short rationale for estimate: For loop runs once time.
     std::vector<StationID> stations_distance_increasing();
 
     // Estimate of performance: O(n)
-    // Short rationale for estimate: std::unordered_map::find is O(n)
+    // Short rationale for estimate: FIND efficiency is O(n).
     StationID find_station_with_coord(Coord xy);
 
     // Estimate of performance: O(n)
-    // Short rationale for estimate: std::unordered_map::erase and insert
-    // are O(n) and std::set::erase and insert are O(log n)
+    // Short rationale for estimate: FIND efficiency is O(n). Extract function efficiency is log(n). This has no effect.
     bool change_station_coord(StationID id, Coord newcoord);
 
     // Estimate of performance: O(n)
-    // Short rationale for estimate: std::unordered_map::find is O(n)
-    // and std::set is O(log n) in this function
+    // Short rationale for estimate: FIND efficiency is O(n).
     bool add_departure(StationID stationid, TrainID trainid, Time time);
 
     // Estimate of performance: O(n)
-    // Short rationale for estimate: std::unordered_map::find is O(n)
-    // and std::set is O(log n) in this function
+    // Short rationale for estimate: FIND efficiency is O(n).
     bool remove_departure(StationID stationid, TrainID trainid, Time time);
 
-    // Estimate of performance: O(n)
-    // Short rationale for estimate: std::vector::push_back is O(n), but
-    // filling a vector by calling std::vector::push_back n times is O(n)
-    // because the vector reserves 2n elements in memory (1+2+4+8+16+32+...≈2n).
-    // This is repeated n times.
+    // Estimate of performance: O(n log(n))
+    // Short rationale for estimate: Sort function efficiency is O(n log(n)). n log(n) dominates n so that's the only term that you care about.
     std::vector<std::pair<Time, TrainID>> station_departures_after(StationID stationid, Time time);
 
     // We recommend you implement the operations below only after implementing the ones above
 
     // Estimate of performance: O(n)
-    // Short rationale for estimate: std::unordered_map::insert is O(n)
+    // Short rationale for estimate: Each time adding takes the same amount of time.
     bool add_region(RegionID id, Name const& name, std::vector<Coord> coords);
 
     // Estimate of performance: O(n)
-    // Short rationale for estimate: Iteration of std::unordered_map is O(n)
+    // Short rationale for estimate: For loop runs once time.
     std::vector<RegionID> all_regions();
 
     // Estimate of performance: O(n)
-    // Short rationale for estimate: std::unordered_map::find is O(n)
+    // Short rationale for estimate: FIND efficiency is O(n).
     Name get_region_name(RegionID id);
 
     // Estimate of performance: O(n)
-    // Short rationale for estimate: std::unordered_map::find is O(n)
+    // Short rationale for estimate: FIND efficiency is O(n).
     std::vector<Coord> get_region_coords(RegionID id);
 
     // Estimate of performance: O(n)
-    // Short rationale for estimate: std::unordered_map::find and insert are O(n)
+    // Short rationale for estimate: FIND efficiency is O(n). Two find function is 2 * O(n) = O(n).
     bool add_subregion_to_region(RegionID id, RegionID parentid);
 
     // Estimate of performance: O(n)
-    // Short rationale for estimate: std::unordered_map::find is O(n)
+    // Short rationale for estimate: FIND efficiency is O(n). Two find function is 2 * O(n) = O(n).
     bool add_station_to_region(StationID id, RegionID parentid);
 
-    // Estimate of performance: O(n)
-    // Short rationale for estimate: Iterating through all parent regions is O(n)
+    // Estimate of performance: O(n log(n))
+    // Short rationale for estimate: Two n functions that affect each other, but not directly.
     std::vector<RegionID> station_in_regions(StationID id);
 
     // Non-compulsory operations
 
-    // Estimate of performance: O(n)
-    // Short rationale for estimate: Iterating through all subregions is O(n)
+    // Estimate of performance:
+    // Short rationale for estimate:
     std::vector<RegionID> all_subregions_of_region(RegionID id);
 
-    // Estimate of performance: O(n)
-    // Short rationale for estimate: Iteration of all stations is O(n)
+    // Estimate of performance:
+    // Short rationale for estimate:
     std::vector<StationID> stations_closest_to(Coord xy);
 
-    // Estimate of performance: O(n)
-    // Short rationale for estimate: std::unordered_map::erase
-    // and std::vector::push_back are O(n)
+    // Estimate of performance:
+    // Short rationale for estimate:
     bool remove_station(StationID id);
 
-    // Estimate of performance: O(n^2)
-    // Short rationale for estimate: std::unordered_set::insert is O(n)
-    // and this is repeated n times
+    // Estimate of performance:
+    // Short rationale for estimate:
     RegionID common_parent_of_regions(RegionID id1, RegionID id2);
 
 private:
     // Add stuff needed for your class implementation here
-    struct Region
+
+    struct Region_
     {
-        RegionID id;
-        Name name;
-        std::vector<Coord> coord;
-        Region* parentRegion;
-        std::vector<Region*> subRegions;
-
-        Region(RegionID id, Name name, std::vector<Coord> coord)
-            : id(id)
-            , name(name)
-            , coord(coord)
-            , parentRegion(nullptr)
-            , subRegions() {}
-    };
-    std::unordered_map<RegionID, Region> regions_from_id;
-
-    struct Station
-    {
-        StationID id;
-        Name name;
-        Coord coord;
-        std::set<std::pair<Time, TrainID>> train_departure_times;
-        Region* region;
-
-        Station(StationID id, Name name, Coord coord)
-            : id(id)
-            , name(name)
-            , coord(coord)
-            , train_departure_times()
-            , region(nullptr) {}
-    };
-    using StationIt = std::list<Station>::iterator;
-    std::list<Station> stations_list;
-    std::unordered_map<StationID, StationIt> stations_from_id;
-    std::unordered_map<Coord, StationIt, CoordHash> stations_from_coord;
-
-    struct AlphabeticOrder
-    {
-        bool operator()(const StationIt& itA, const StationIt& itB) const
-        {
-            return itA->name < itB->name;
-        }
-    };
-    struct DistanceOrder
-    {
-        bool operator()(const StationIt& itA, const StationIt& itB) const
-        {
-            auto [xA, yA] = itA->coord;
-            auto [xB, yB] = itB->coord;
-
-            // Instead of comparing sqrt(x^2+y^2), compare x^2+y^2 because it is
-            // easier to compare integer values
-            int sqSumA = xA*xA + yA*yA;
-            int sqSumB = xB*xB + yB*yB;
-            if (sqSumA != sqSumB) {
-                return sqSumA < sqSumB;
-            }
-
-            // Compare y coordinates
-            return yA < yB;
-        }
-    };
-    // Store stations, so methods stations_alphabetically and
-    // stations_distance_increasing can run faster
-    std::set<StationIt, AlphabeticOrder> alphabetic_stations;
-    std::set<StationIt, DistanceOrder> distance_stations;
-    std::vector<StationID> alphabetic_stations_vector;
-    std::vector<StationID> distance_stations_vector;
-    bool alphabetic_stations_needs_update = true;
-    bool distance_stations_needs_update = true;
-
-    // Handle removed stations in alphabetic_stations and distance_stations
-    std::vector<StationIt> removed_stations;
-    void delete_stations_if_needed()
-    {
-        for (auto &&station : removed_stations)
-        {
-            alphabetic_stations.erase(station);
-            distance_stations.erase(station);
-            stations_list.erase(station);
-        }
-        removed_stations.clear();
-    }
-
-    // Struct for comparing distances in stations_closest_to
-    struct StationComp {
-        int dist;
-        int y;
-        const StationID& id;
-
-        StationComp(const StationIt& station, const Coord& xy)
-        : id(station->id)
-        {
-            int x = xy.x - station->coord.x;
-            y = xy.y - station->coord.y;
-            dist = x*x + y*y;
-        }
-
-        bool operator<(const StationComp& cmp) const
-        {
-            if (dist != cmp.dist) return dist < cmp.dist;
-            if (y != cmp.y) return y < cmp.y;
-            return id < cmp.id;
-        }
+        RegionID region_id_;
+        Name region_name_;
+        std::vector<Coord> region_coord_;
+        Region_* next_region_ = nullptr;
     };
 
-    // Recursive function for Datastructures::all_subregions_of_region
-    void iterateTree(std::vector<RegionID>& subregions, Region& region)
+    struct Station_
     {
-        for (auto next_region : region.subRegions)
-        {
-            subregions.push_back(next_region->id);
-            iterateTree(subregions, *next_region);
-        }
-    }
+        StationID station_id_;
+        Name station_name_;
+        Coord station_coord_;
+        TrainID trainid_;
+        Region_* region_ = nullptr;
 
-    // Convert set to vector
-    template<typename T>
-    std::vector<StationID> setToVector(T set)
-    {
-        std::vector<StationID> v;
-        v.reserve(set.size());
-        for (auto &&s : set)
-        {
-            v.push_back(s->id);
-        }
-        return v;
-    }
+    };
+
+
+    // All_station save STL maps.
+    // ALL_points payload is station pointer
+    std::map<Coord, Station_*> all_stations_;
+
+    std::vector<Station_*> all_station_pointer_;
+    std::map<std::pair<Time, TrainID>, StationID> departures_;
+
+    std::map<RegionID, Region_*> all_region_;
+
+
+
+
+
 };
 
 #endif // DATASTRUCTURES_HH
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
