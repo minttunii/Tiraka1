@@ -256,7 +256,7 @@ public:
     std::vector<std::pair<StationID, Time>> route_earliest_arrival(StationID fromid, StationID toid, Time starttime);
 
 private:
-    // Add stuff needed for your class implementation here
+
     struct Station {
         Name name;
         Coord coord;
@@ -272,6 +272,11 @@ private:
         std::unordered_set<StationID> stations_in_region;
     } region;
 
+    struct Train {
+        std::vector<std::pair<StationID, Time>> trainroute;
+
+    } train;
+
     std::unordered_map<StationID, Station> stations;
     std::unordered_map<RegionID, Region> regions;
     std::map<Coord, StationID> station_coords;
@@ -282,6 +287,9 @@ private:
                            std::pair<const RegionID, Region>*,
                            std::pair<const RegionID, Region>*,
                            std::pair<const RegionID, Region>*);
+
+    std::unordered_map<TrainID, Train> trains;
+
 };
 
 #endif // DATASTRUCTURES_HH

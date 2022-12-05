@@ -479,31 +479,96 @@ RegionID Datastructures::common_parent_of_regions(RegionID id1, RegionID id2)
     return common_parent(parent1, parent2, parent1->second.upper_region, parent2->second.upper_region);
 }
 
-bool Datastructures::add_train(TrainID /*trainid*/, std::vector<std::pair<StationID, Time> > /*stationtimes*/)
+bool Datastructures::add_train(TrainID trainid, std::vector<std::pair<StationID, Time> > stationtimes)
 {
-    // Replace the line below with your implementation
-    // Also uncomment parameters ( /* param */ -> param )
-    throw NotImplemented("add_train()");
+    auto it = trains.find(trainid);
+    // If train already exists
+    if(it != trains.end()){
+        return false;
+    }
+
+    for(auto &pair : stationtimes){
+        auto iter = stations.find(pair.first);
+        // If station doens't exist
+        if(iter == stations.end()){
+            return false;
+        }
+        // Train needs to be added to station's train information
+        iter->second.trains.insert({pair.second, trainid});
+    }
+
+    // Add train to the trains map
+    train.trainroute = stationtimes;
+    trains.insert({trainid, train});
+    return true;
 }
 
-std::vector<StationID> Datastructures::next_stations_from(StationID /*id*/)
+std::vector<StationID> Datastructures::next_stations_from(StationID id)
 {
-    // Replace the line below with your implementation
-    // Also uncomment parameters ( /* param */ -> param )
-    throw NotImplemented("next_stations_from()");
+    auto it = stations.find(id);
+    // If station is not found
+    if(it == stations.end()){
+        return {NO_STATION};
+    }
+
+    auto station_trains = it->second.trains;
+    // If no trains are leaving the station
+    if(station_trains.empty()){
+        return {};
+    }
+
+    std::vector<StationID> next_stations;
+
+    // Find the next stations
+    for(auto &pair : station_trains){
+        TrainID train = pair.second;
+        auto iter = trains.find(train);
+
+        if(iter != trains.end()){
+            // Find and add the next station on route
+            auto route = iter->second.trainroute;
+            for(unsigned long long i = 1; i < route.size()+1; i++){
+                if(route.at(i-1).first == id && i < route.size()){
+                    // The next station was found
+                    next_stations.push_back(route.at(i).first);
+                    break;
+                }
+            }
+        }
+    }
+    return next_stations;
 }
 
-std::vector<StationID> Datastructures::train_stations_from(StationID /*stationid*/, TrainID /*trainid*/)
+std::vector<StationID> Datastructures::train_stations_from(StationID stationid, TrainID trainid)
 {
-    // Replace the line below with your implementation
-    // Also uncomment parameters ( /* param */ -> param )
-    throw NotImplemented("train_stations_from()");
+    auto it = stations.find(stationid);
+    auto it2 = trains.find(trainid);
+    // If station or train is not found
+    if(it == stations.end() || it2 == trains.end()){
+        return {NO_STATION};
+    }
+
+    std::vector<StationID> stations_from;
+
+    // Station needs to be searched from train route
+    auto route = it2->second.trainroute;
+    for(auto i = route.begin(); i != route.end(); i++){
+        if(i->first == stationid){
+            // Add the stations from route
+            std::for_each(i+1, route.end(), [&stations_from](std::pair<StationID, Time> &station) {
+                stations_from.push_back(station.first);
+            });
+            break;
+        }
+    }
+
+    return stations_from;
+
 }
 
 void Datastructures::clear_trains()
 {
-    // Replace the line below with your implementation
-    throw NotImplemented("clear_trains()");
+    trains.clear();
 }
 
 std::vector<std::pair<StationID, Distance>> Datastructures::route_any(StationID /*fromid*/, StationID /*toid*/)
