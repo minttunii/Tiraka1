@@ -2,7 +2,7 @@
 //
 // Student name: Minttu Niiranen
 // Student email: minttu.niiranen@tuni.fi
-// Student number: 0408538846
+// Student number: H291834
 
 #include "datastructures.hh"
 
