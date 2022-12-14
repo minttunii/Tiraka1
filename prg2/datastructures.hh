@@ -7,6 +7,7 @@
 #ifndef DATASTRUCTURES_HH
 #define DATASTRUCTURES_HH
 
+#include <cmath>
 #include <map>
 #include <string>
 #include <unordered_set>
@@ -16,6 +17,7 @@
 #include <limits>
 #include <functional>
 #include <exception>
+#include <set>
 
 // Types for IDs
 using StationID = std::string;
@@ -217,20 +219,21 @@ public:
     // New assignment 2 operations
     //
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(nlogn)
+    // Short rationale for estimate: For loop that iterates stationtimes is linear
+    // and inserting train to stations in is log(n). Inserting to trains map is constant on average.
     bool add_train(TrainID trainid, std::vector<std::pair<StationID, Time>> stationtimes);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(n^2)
+    // Short rationale for estimate: Two for loops
     std::vector<StationID> next_stations_from(StationID id);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(n^2)
+    // Short rationale for estimate: for loop is linear and for each is linear in worst case
     std::vector<StationID> train_stations_from(StationID stationid, TrainID trainid);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(n^2)
+    // Short rationale for estimate: Clear function and for loop is linear.
     void clear_trains();
 
     // Estimate of performance:
@@ -256,12 +259,33 @@ public:
     std::vector<std::pair<StationID, Time>> route_earliest_arrival(StationID fromid, StationID toid, Time starttime);
 
 private:
+    struct SetComp {
+        bool operator() (const std::pair<StationID, Time>& a,
+                        const std::pair<StationID,Time>& b) const
+        {
+            return a.second < b.second;
+        }
+    };
+
+    enum Colour {white, gray, black};
+
+    struct Train {
+        std::vector<std::pair<StationID, Time>> route_vector;
+        std::set<std::pair<StationID, Time>, SetComp> trainroute;
+
+    } train;
 
     struct Station {
+        StationID stationid;
         Name name;
         Coord coord;
-        std::multimap<Time, TrainID> trains;
+        std::multimap<Time, TrainID> departures;
         RegionID upper_id = 0;
+        std::unordered_map<TrainID, Train> station_trains;
+        Colour colour = white;
+        //int cost = INFINITY;
+        Station* path_back = nullptr;
+        std::vector<StationID> neigbours;
     } station;
 
     struct Region {
@@ -271,11 +295,6 @@ private:
         std::pair<const RegionID, Region>* upper_region = nullptr;
         std::unordered_set<StationID> stations_in_region;
     } region;
-
-    struct Train {
-        std::vector<std::pair<StationID, Time>> trainroute;
-
-    } train;
 
     std::unordered_map<StationID, Station> stations;
     std::unordered_map<RegionID, Region> regions;
@@ -287,9 +306,7 @@ private:
                            std::pair<const RegionID, Region>*,
                            std::pair<const RegionID, Region>*,
                            std::pair<const RegionID, Region>*);
-
-    std::unordered_map<TrainID, Train> trains;
-
+    std::unordered_set<TrainID> all_trains;
 };
 
 #endif // DATASTRUCTURES_HH
