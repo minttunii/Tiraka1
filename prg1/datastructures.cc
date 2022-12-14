@@ -271,11 +271,12 @@ std::vector<std::pair<Time, TrainID>> Datastructures::station_departures_after(S
     }
 
     auto trains = it->second.trains;
-    for(auto &elem : trains){
-        if(elem.first >= time){
-            departures.push_back({elem.first, elem.second});
-        }
+    auto itlow = trains.lower_bound(time);
+
+    for(auto i = itlow; i != trains.end(); i++){
+        departures.push_back({i->first, i->second});
     }
+
     return departures;
 }
 

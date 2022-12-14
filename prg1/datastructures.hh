@@ -172,7 +172,7 @@ public:
     bool remove_departure(StationID stationid, TrainID trainid, Time time);
 
     // Estimate of performance: O(n)
-    // Short rationale for estimate: Find is logarithmic and creating vector in for loop is linear
+    // Short rationale for estimate: Find and lower bound is logarithmic, for loop is linear in worst case
     std::vector<std::pair<Time, TrainID>> station_departures_after(StationID stationid, Time time);
 
     // We recommend you implement the operations below only after implementing the ones above
