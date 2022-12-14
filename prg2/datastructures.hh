@@ -224,8 +224,8 @@ public:
     // and inserting train to stations in is log(n). Inserting to trains map is constant on average.
     bool add_train(TrainID trainid, std::vector<std::pair<StationID, Time>> stationtimes);
 
-    // Estimate of performance: O(n^2)
-    // Short rationale for estimate: Two for loops
+    // Estimate of performance: O(n)
+    // Short rationale for estimate: For loop is linear and vector pushback is constant on average.
     std::vector<StationID> next_stations_from(StationID id);
 
     // Estimate of performance: O(n^2)
@@ -270,8 +270,8 @@ private:
     enum Colour {white, gray, black};
 
     struct Train {
-        std::vector<std::pair<StationID, Time>> route_vector;
-        std::set<std::pair<StationID, Time>, SetComp> trainroute;
+        std::vector<std::pair<StationID, Time>> trainroute;
+        //std::set<std::pair<StationID, Time>, SetComp> trainroute;
 
     } train;
 
@@ -283,7 +283,8 @@ private:
         RegionID upper_id = 0;
         std::unordered_map<TrainID, Train> station_trains;
         Colour colour = white;
-        //int cost = INFINITY;
+        int st_number = 0;
+        int distance = 0;
         Station* path_back = nullptr;
         std::vector<StationID> neigbours;
     } station;
@@ -306,6 +307,7 @@ private:
                            std::pair<const RegionID, Region>*,
                            std::pair<const RegionID, Region>*,
                            std::pair<const RegionID, Region>*);
+    int dist(const Coord &c1, const Coord &c2);
     std::unordered_set<TrainID> all_trains;
 };
 
