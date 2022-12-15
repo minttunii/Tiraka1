@@ -748,18 +748,23 @@ std::vector<StationID> Datastructures::train_stations_from(StationID stationid, 
 void Datastructures::clear_trains()
 {
     all_trains.clear();
-    // Trains needs to be cleared from station departures
+    // Trains needs to be cleared from stations
     for(auto &elem : stations){
         elem.second.departures.clear();
         elem.second.station_trains.clear();
         elem.second.neigbours.clear();
+        // Station certain attributes need to be changed
+        elem.second.path_back = nullptr;
+        elem.second.colour = white;
+        elem.second.distance = 0;
+        elem.second.need_refresh = false;
     }
 }
 
 int Datastructures::dist(const Coord &c1, const Coord &c2){
     int diffx = floor((c1.x-c2.x)*(c1.x-c2.x));
     int diffy = floor((c1.y-c2.y)*(c1.y-c2.y));
-    return sqrt(diffx + diffy);
+    return (int) sqrt(diffx + diffy);
 }
 
 /*!
@@ -771,13 +776,11 @@ int Datastructures::dist(const Coord &c1, const Coord &c2){
  */
 std::vector<std::pair<StationID, Distance>> Datastructures::route_any(StationID fromid, StationID toid)
 {
-    auto fromit = stations.find(fromid);
-    auto toit = stations.find(toid);
+    auto fromit = stations.find(fromid); auto toit = stations.find(toid);
     // If one of the stations don't exist
     if(fromit == stations.end() || toit == stations.end()){
         return {{NO_STATION, NO_DISTANCE}};
     }
-
     std::vector<std::pair<StationID, Distance>> route;
     // If start or end station doesn't have trains
     if(fromit->second.departures.empty() || toit->second.departures.empty()){
@@ -785,29 +788,41 @@ std::vector<std::pair<StationID, Distance>> Datastructures::route_any(StationID 
     }
 
     std::queue<StationID> Q;
-    //std::queue<std::shared_ptr<Station>> Q;
-    fromit->second.st_number = 0;
+    fromit->second.distance = 0;
+    fromit->second.path_back = nullptr;
     fromit->second.colour = gray;
+    fromit->second.need_refresh = true;
     Q.push(fromit->first);
     bool end_found = false;
 
     while (!Q.empty() && !end_found) {
        StationID s = Q.front(); // Take new stationID
        Q.pop();
-       auto neighbours_it = stations.find(s); // Find neighbours of the station
+       auto neighbours_it = stations.find(s);
        if(neighbours_it != stations.end()){
+           // Go through all the neighbours
            for(const StationID &u : neighbours_it->second.neigbours){
                auto stationit = stations.find(u); // Find station
                if(stationit != stations.end()){
-                   // If station has not been dealed yet
                    auto st = stationit->second;
+                   if(st.need_refresh){
+                       st.colour = white;
+                       st.distance = 0;
+                       st.path_back = nullptr;
+                       st.need_refresh = false;
+                   }
                    if(st.colour == white){
                        st.colour = gray;
-                       st.st_number += 1;
-                       Station* pi = &(neighbours_it->second); // Pointer to station before in route
+                       std::shared_ptr<Station> pi = std::make_shared<Station>(neighbours_it->second);
+                       // Pointer to station before in route
                        st.path_back = pi;
                        Q.push(stationit->first);
-                       st.distance = dist(fromit->second.coord, st.coord);
+                       if(st.path_back != nullptr){
+                           st.distance = dist(st.path_back->coord, st.coord) + st.path_back->distance;
+                       } else {
+                           st.distance = 0;
+                       }
+                       st.need_refresh = true;
                    }
                    stationit->second = st;
                }
@@ -820,35 +835,103 @@ std::vector<std::pair<StationID, Distance>> Datastructures::route_any(StationID 
            neighbours_it->second.colour = black;
        }
     }
-    if(!end_found){ return {{}}; } // No route found
+    if(!end_found){ return {}; } // No route found
 
     // End node
-    auto endit = stations.find(toid);
-    route.push_back({endit->first, endit->second.distance});
-    Station* s = endit->second.path_back;
-    //Station* s_temp;
+    route.push_back({toit->first, toit->second.distance});
+    auto s = toit->second.path_back;
     while(true && s != nullptr){
         route.push_back({s->stationid, s->distance});
         if(s->stationid == fromid){
-            s->colour = white;
+            s->need_refresh = true;
             break;
         }
-        //s_temp = s;
-        s = s->path_back;
-        //s_temp->colour = white; s_temp->st_number = 0; s_temp->distance = 0;
-        //s_temp->path_back = nullptr;
+        s->need_refresh = true;
+        s = s->path_back;   
     }
-    //delete s_temp;
     // Path is found from end to start, so we need to reverse the route
     std::reverse(route.begin(), route.end());
     return route;
 }
 
-std::vector<std::pair<StationID, Distance>> Datastructures::route_least_stations(StationID /*fromid*/, StationID /*toid*/)
+std::vector<std::pair<StationID, Distance>> Datastructures::route_least_stations(StationID fromid, StationID toid)
 {
-    // Replace the line below with your implementation
-    // Also uncomment parameters ( /* param */ -> param )
-    throw NotImplemented("route_least_stations()");
+    auto fromit = stations.find(fromid); auto toit = stations.find(toid);
+    // If one of the stations don't exist
+    if(fromit == stations.end() || toit == stations.end()){
+        return {{NO_STATION, NO_DISTANCE}};
+    }
+    std::vector<std::pair<StationID, Distance>> route;
+    // If start or end station doesn't have trains
+    if(fromit->second.departures.empty() || toit->second.departures.empty()){
+        return route;
+    }
+
+    std::queue<StationID> Q;
+    fromit->second.distance = 0;
+    fromit->second.path_back = nullptr;
+    fromit->second.colour = gray;
+    fromit->second.need_refresh = true;
+    Q.push(fromit->first);
+    bool end_found = false;
+
+    while (!Q.empty() && !end_found) {
+       StationID s = Q.front(); // Take new stationID
+       Q.pop();
+       auto neighbours_it = stations.find(s);
+       if(neighbours_it != stations.end()){
+           // Go through all the neighbours
+           for(const StationID &u : neighbours_it->second.neigbours){
+               auto stationit = stations.find(u); // Find station
+               if(stationit != stations.end()){
+                   auto st = stationit->second;
+                   if(st.need_refresh){
+                       st.colour = white;
+                       st.distance = 0;
+                       st.path_back = nullptr;
+                       st.need_refresh = false;
+                   }
+                   if(st.colour == white){
+                       st.colour = gray;
+                       std::shared_ptr<Station> pi = std::make_shared<Station>(neighbours_it->second);
+                       // Pointer to station before in route
+                       st.path_back = pi;
+                       Q.push(stationit->first);
+                       if(st.path_back != nullptr){
+                           st.distance = dist(st.path_back->coord, st.coord) + st.path_back->distance;
+                       } else {
+                           st.distance = 0;
+                       }
+                       st.need_refresh = true;
+                   }
+                   stationit->second = st;
+               }
+               // If the end stations is found
+               if(stationit->first == toid){
+                   end_found = true;
+                   break;
+               }
+           }
+           neighbours_it->second.colour = black;
+       }
+    }
+    if(!end_found){ return {}; } // No route found
+
+    // End node
+    route.push_back({toit->first, toit->second.distance});
+    auto s = toit->second.path_back;
+    while(true && s != nullptr){
+        route.push_back({s->stationid, s->distance});
+        if(s->stationid == fromid){
+            s->need_refresh = true;
+            break;
+        }
+        s->need_refresh = true;
+        s = s->path_back;
+    }
+    // Path is found from end to start, so we need to reverse the route
+    std::reverse(route.begin(), route.end());
+    return route;
 }
 
 std::vector<StationID> Datastructures::route_with_cycle(StationID /*fromid*/)

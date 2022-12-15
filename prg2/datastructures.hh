@@ -9,6 +9,7 @@
 
 #include <cmath>
 #include <map>
+#include <memory>
 #include <string>
 #include <unordered_set>
 #include <vector>
@@ -233,11 +234,12 @@ public:
     std::vector<StationID> train_stations_from(StationID stationid, TrainID trainid);
 
     // Estimate of performance: O(n^2)
-    // Short rationale for estimate: Clear function and for loop is linear.
+    // Short rationale for estimate: Clear function and for loop are linear.
     void clear_trains();
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(n^2)
+    // Short rationale for estimate: BFS algorithm is O(n+k), where n is number of
+    // nodes and k is numer of connections.
     std::vector<std::pair<StationID, Distance>> route_any(StationID fromid, StationID toid);
 
     // Non-compulsory operations
@@ -283,9 +285,9 @@ private:
         RegionID upper_id = 0;
         std::unordered_map<TrainID, Train> station_trains;
         Colour colour = white;
-        int st_number = 0;
         int distance = 0;
-        Station* path_back = nullptr;
+        std::shared_ptr<Station> path_back = nullptr;
+        bool need_refresh = false;
         std::vector<StationID> neigbours;
     } station;
 
