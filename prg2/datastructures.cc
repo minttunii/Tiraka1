@@ -1,8 +1,4 @@
 // Datastructures.cc
-//
-// Student name: Minttu Niiranen
-// Student email: minttu.niiranen@tuni.fi
-// Student number: H291834
 
 #include "datastructures.hh"
 
@@ -941,11 +937,93 @@ std::vector<StationID> Datastructures::route_with_cycle(StationID /*fromid*/)
     throw NotImplemented("route_with_cycle()");
 }
 
-std::vector<std::pair<StationID, Distance>> Datastructures::route_shortest_distance(StationID /*fromid*/, StationID /*toid*/)
+std::vector<std::pair<StationID, Distance>> Datastructures::route_shortest_distance(StationID fromid, StationID toid)
 {
-    // Replace the line below with your implementation
-    // Also uncomment parameters ( /* param */ -> param )
-    throw NotImplemented("route_shortest_distance()");
+    auto fromit = stations.find(fromid); auto toit = stations.find(toid);
+    // If one of the stations don't exist
+    if(fromit == stations.end() || toit == stations.end()){
+        return {{NO_STATION, NO_DISTANCE}};
+    }
+
+    std::vector<std::pair<StationID, Distance>> route;
+    // If start or end station doesn't have trains
+    if(fromit->second.neigbours.empty() || toit->second.neigbours.empty()){
+        return route;
+    }
+    auto comp = [](const Station &a, const Station &b){ return a.cost > b.cost;};
+    std::priority_queue<Station, std::vector<Station>, decltype(comp)> Q(comp);
+
+    auto startStation = fromit->second;
+    startStation.cost = 0;
+    startStation.distance = 0;
+    startStation.colour = gray;
+    startStation.need_refresh = true;
+    Q.push(startStation);
+    bool end_found = false;
+
+    while(!Q.empty() && !end_found){
+        Station s = Q.top();
+        Q.pop();
+        auto neighbours = s.neigbours;
+        for(auto &u : neighbours){
+            auto it = stations.find(u); // Find station
+            if(it != stations.end()){
+                Station st = it->second;
+                if(st.need_refresh){
+                    st.distance = 0;
+                    st.colour = white;
+                    st.cost = INT_MAX;
+                    st.path_back = nullptr;
+                    st.need_refresh = false;
+                }
+                // Relax
+                bool shorter = false;
+                if(st.cost > s.cost + dist(s.coord, st.coord)){
+                    st.cost = s.cost + dist(s.coord, st.coord);
+                    st.distance = s.distance + dist(s.coord, st.coord);
+                    std::shared_ptr<Station> pi = std::make_shared<Station>(s);
+                    st.path_back = pi;
+                    it->second = st;
+                    shorter = true;
+                    st.need_refresh = true;
+                }
+                if(st.path_back != nullptr){
+                    st.distance = dist(st.path_back->coord, st.coord) + st.path_back->distance;
+                }
+                // After relax
+                if(st.colour == white){
+                    st.colour = gray;
+                    Q.push(st);
+                    st.need_refresh = true;
+                } else if(shorter){
+                    Q.push(st);
+                }
+            }
+            // If end station is found
+            if(it->first == toid){
+                end_found = true;
+                break;
+            }
+        }
+        s.colour = black;
+    }
+    if(!end_found){ return {}; } // No route found
+
+    // End node
+    route.push_back({toit->first, toit->second.distance});
+    auto s = toit->second.path_back;
+    while(true && s != nullptr){
+        route.push_back({s->stationid, s->distance});
+        if(s->stationid == fromid){
+            s->need_refresh = true;
+            break;
+        }
+        s->need_refresh = true;
+        s = s->path_back;
+    }
+    // Path is found from end to start, so we need to reverse the route
+    std::reverse(route.begin(), route.end());
+    return route;
 }
 
 std::vector<std::pair<StationID, Time>> Datastructures::route_earliest_arrival(StationID /*fromid*/, StationID /*toid*/, Time /*starttime*/)

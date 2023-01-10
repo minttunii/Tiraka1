@@ -1,8 +1,4 @@
 // Datastructures.hh
-//
-// Student name: Minttu Niiranen
-// Student email: minttu.niiranen@tuni.fi
-// Student number: H291834
 
 #ifndef DATASTRUCTURES_HH
 #define DATASTRUCTURES_HH
@@ -244,8 +240,9 @@ public:
 
     // Non-compulsory operations
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(n^2)
+    // Short rationale for estimate: BFS algorithm is O(n+k), where n is number of
+    // nodes and k is numer of connections.
     std::vector<std::pair<StationID, Distance>> route_least_stations(StationID fromid, StationID toid);
 
     // Estimate of performance:
@@ -289,6 +286,7 @@ private:
         std::shared_ptr<Station> path_back = nullptr;
         bool need_refresh = false;
         std::vector<StationID> neigbours;
+        int cost = INT_MAX; // Cost for Dijktras algortihm
     } station;
 
     struct Region {
